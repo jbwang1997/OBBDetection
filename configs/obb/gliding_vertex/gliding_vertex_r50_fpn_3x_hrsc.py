@@ -1,11 +1,11 @@
 _base_ = [
-    '../_base_/datasets/ss_dota_obb.py',
-    '../_base_/schedules/schedule_1x.py',
+    '../_base_/datasets/hrsc_obb.py',
+    '../_base_/schedules/schedule_3x.py',
     '../../_base_/default_runtime.py'
 ]
 
 model = dict(
-    type='FasterRCNNOBB',
+    type='GlidingVertex',
     pretrained='torchvision://resnet50',
     backbone=dict(
         type='ResNet',
@@ -38,30 +38,36 @@ model = dict(
             type='CrossEntropyLoss', use_sigmoid=True, loss_weight=1.0),
         loss_bbox=dict(type='SmoothL1Loss', beta=1.0 / 9.0, loss_weight=1.0)),
     roi_head=dict(
-        type='OBBStandardRoIHead',
+        type='GVRatioRoIHead',
         bbox_roi_extractor=dict(
             type='SingleRoIExtractor',
             roi_layer=dict(type='RoIAlign', out_size=7, sample_num=2),
             out_channels=256,
             featmap_strides=[4, 8, 16, 32]),
         bbox_head=dict(
-            type='OBBShared2FCBBoxHead',
-            start_bbox_type='hbb',
-            end_bbox_type='obb',
+            type='GVBBoxHead',
+            num_shared_fcs=2,
+            roi_feat_size=7,
             in_channels=256,
             fc_out_channels=1024,
-            roi_feat_size=7,
             num_classes=15,
+            ratio_thr=0.8,
             bbox_coder=dict(
-                type='HBB2OBBDeltaXYWHTCoder',
-                target_means=[0., 0., 0., 0., 0.],
-                target_stds=[0.1, 0.1, 0.2, 0.2, 1]),
-            reg_class_agnostic=True,
+                type='DeltaXYWHBBoxCoder',
+                target_means=[0., 0., 0., 0.],
+                target_stds=[0.1, 0.1, 0.2, 0.2]),
+            fix_coder=dict(type='GVFixCoder'),
+            ratio_coder=dict(type='GVRatioCoder'),
             loss_cls=dict(
                 type='CrossEntropyLoss',
                 use_sigmoid=False,
                 loss_weight=1.0),
-            loss_bbox=dict(type='SmoothL1Loss', beta=1.0, loss_weight=1.0))))
+            loss_bbox=dict(
+                type='SmoothL1Loss', beta=1., loss_weight=1.0),
+            loss_fix=dict(
+                type='SmoothL1Loss', beta=1./3., loss_weight=1.0),
+            loss_ratio=dict(
+                type='SmoothL1Loss', beta=1./3., loss_weight=16.0))))
 # model training and testing settings
 train_cfg = dict(
     rpn=dict(
@@ -115,4 +121,4 @@ test_cfg = dict(
         nms_thr=0.7,
         min_bbox_size=0),
     rcnn=dict(
-        score_thr=0.05, nms=dict(type='obb_nms', iou_thr=0.1), max_per_img=2000))
+        score_thr=0.05, nms=dict(type='poly_nms', iou_thr=0.1), max_per_img=2000))

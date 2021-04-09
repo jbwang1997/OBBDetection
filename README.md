@@ -24,7 +24,7 @@ So the OBBDetection is accessible to all models and features in MMdetection.
 
 - **Efficiency of training and testing big images**
 
-  For dataset like DOTA, OBBDetection can directly merge patch results. So, it's available to validate big image dataset during training, and get the final results directly from testing.
+  For dataset like DOTA, OBBDetection can directly merge patch results. So, it's available to validate big image dataset during training, and get the final results directly from testing. Attributing to higher vision of MMdetection, the performance of OBBDetection is better than the [AerialDetection](https://github.com/dingjiansw101/AerialDetection).
   
 
 ## License

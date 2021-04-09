@@ -4,15 +4,13 @@ _base_ = [
     '../../_base_/default_runtime.py'
 ]
 
-pi=3.141592
-
 
 model = dict(
     type='RoITransformer',
-    pretrained='torchvision://resnet50',
+    pretrained='torchvision://resnet101',
     backbone=dict(
         type='ResNet',
-        depth=50,
+        depth=101,
         num_stages=4,
         out_indices=(0, 1, 2, 3),
         frozen_stages=1,
@@ -69,7 +67,7 @@ model = dict(
                 bbox_coder=dict(
                     type='HBB2OBBDeltaXYWHTCoder',
                     target_means=[0., 0., 0., 0., 0.],
-                    target_stds=[0.1, 0.1, 0.2, 0.2, 0.2]),
+                    target_stds=[0.1, 0.1, 0.2, 0.2, 1]),
                 reg_class_agnostic=True,
                 loss_cls=dict(
                     type='CrossEntropyLoss',
@@ -88,7 +86,7 @@ model = dict(
                 bbox_coder=dict(
                     type='OBB2OBBDeltaXYWHTCoder',
                     target_means=[0., 0., 0., 0., 0.],
-                    target_stds=[0.05, 0.05, 0.1, 0.1, 0.1]),
+                    target_stds=[0.05, 0.05, 0.1, 0.1, 0.5]),
                 reg_class_agnostic=False,
                 loss_cls=dict(
                     type='CrossEntropyLoss',
