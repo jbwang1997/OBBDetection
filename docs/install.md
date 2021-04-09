@@ -7,16 +7,16 @@
 - PyTorch 1.3+
 - CUDA 9.2+ (If you build PyTorch from source, CUDA 9.0 is also compatible)
 - GCC 5+
-- [mmcv](https://github.com/open-mmlab/mmcv)
+- [mmcv 0.6.2](https://github.com/open-mmlab/mmcv)
+- [BboxToolkit 1.0](https://github.com/jbwang1997/BboxToolkit)
 
-
-### Install mmdetection
+### Install OBBDetection
 
 a. Create a conda virtual environment and activate it.
 
 ```shell
-conda create -n open-mmlab python=3.7 -y
-conda activate open-mmlab
+conda create -n obbdetection python=3.7 -y
+conda activate obbdetection
 ```
 
 b. Install PyTorch and torchvision following the [official instructions](https://pytorch.org/), e.g.,
@@ -45,24 +45,29 @@ conda install pytorch=1.3.1 cudatoolkit=9.2 torchvision=0.4.2 -c pytorch
 If you build PyTorch from source instead of installing the prebuilt pacakge,
 you can use more CUDA versions such as 9.0.
 
-c. Clone the mmdetection repository.
+c. Clone the OBBDetection repository.
 
 ```shell
-git clone https://github.com/open-mmlab/mmdetection.git
-cd mmdetection
+git clone https://github.com/jbwang1997/OBBDetection.git --recursive
+cd OBBDetection
 ```
 
-d. Install build requirements and then install mmdetection.
-(We install our forked version of pycocotools via the github repo instead of pypi
-for better compatibility with our repo.)
+d. Install build requirements and then install OBBDetection.
 
 ```shell
+# install the BboxToolkit
+cd BboxToolkit
+pip install -v -e .  # or "python setup.py develop"
+cd ..
+
+# install the OBBDetection
 pip install -r requirements/build.txt
-pip install "git+https://github.com/open-mmlab/cocoapi.git#subdirectory=pycocotools"
+pip install mmpycocotools
+pip install mmcv==0.6.2
 pip install -v -e .  # or "python setup.py develop"
 ```
 
-If you build mmdetection on macOS, replace the last command with
+If you build OBBDetection on macOS, replace the last command with
 
 ```
 CC=clang CXX=clang++ CFLAGS='-stdlib=libc++' pip install -e .
@@ -81,7 +86,7 @@ It is recommended that you run step d each time you pull some updates from githu
     find . -name "*.so" | xargs rm
     ```
 
-2. Following the above instructions, mmdetection is installed on `dev` mode, any local modifications made to the code will take effect without the need to reinstall it (unless you submit some commits and want to update the version number).
+2. Following the above instructions, OBBDetection is installed on `dev` mode, any local modifications made to the code will take effect without the need to reinstall it (unless you submit some commits and want to update the version number).
 
 3. If you would like to use `opencv-python-headless` instead of `opencv-python`,
 you can install it before installing MMCV.
@@ -102,45 +107,3 @@ However some functionality is gone in this mode:
 
 So if you try to run inference with a model containing deformable convolution you will get an error.
 Note: We set `use_torchvision=True` on-the-fly in CPU mode for `RoIPool` and `RoIAlign`
-
-### Another option: Docker Image
-
-We provide a [Dockerfile](https://github.com/open-mmlab/mmdetection/blob/master/docker/Dockerfile) to build an image.
-
-```shell
-# build an image with PyTorch 1.5, CUDA 10.1
-docker build -t mmdetection docker/
-```
-
-Run it with
-
-```shell
-docker run --gpus all --shm-size=8g -it -v {DATA_DIR}:/mmdetection/data mmdetection
-```
-
-### A from-scratch setup script
-
-Here is a full script for setting up mmdetection with conda.
-
-```shell
-conda create -n open-mmlab python=3.7 -y
-conda activate open-mmlab
-
-# install latest pytorch prebuilt with the default prebuilt CUDA version (usually the latest)
-conda install -c pytorch pytorch torchvision -y
-git clone https://github.com/open-mmlab/mmdetection.git
-cd mmdetection
-pip install -r requirements/build.txt
-pip install "git+https://github.com/open-mmlab/cocoapi.git#subdirectory=pycocotools"
-pip install -v -e .
-```
-
-### Using multiple MMDetection versions
-
-The train and test scripts already modify the `PYTHONPATH` to ensure the script use the MMDetection in the current directory.
-
-To use the default MMDetection installed in the environment rather than that you are working with, you can remove the following line in those scripts
-
-```shell
-PYTHONPATH="$(dirname $0)/..":$PYTHONPATH
-```
