@@ -4,27 +4,27 @@
 
 ## introduction
 OBBDetection is a open source oriented object detection toolbox based on the [MMdetection](https://github.com/open-mmlab/mmdetection).
-We didn't change the codes in MMdetection, only add the extra codes in **obb** folders.
-So the OBBDetection is accessible to all models and features in MMdetection.
-![demo image](demo/dota_test_P0628_0001.png)
+
+![demo image](demo/dota_demo.jpg)
 
 ### Major features
 
 - **MMdetection inheritance**
 
-  OBBDetection didn't change any codes in MMdetection. Instead, we create a new folder, named **obb**, to collect the additive codes. All structures and features are same as MMdetection.
+  OBBDetection is modified from MMdetection v2.2, where all additive codes are put at newly created folders named **obb**. The structure of MMdetection isn't change, so our OBBDetection inherits all features from MMdetection.
 
 - **Support of multiple frameworks out of box**
 
-  Except the common horizontal detection frameworks, the toolbox supports popular oriented detection frameworks *e.g.* Faster RCNN OBB, RoI Transformer, Gliding Vertex.
+  Except for horizontal detection frameworks, the toolbox supports popular oriented detection frameworks, *e.g.* Faster RCNN OBB, RoI Transformer, Gliding Vertex.
 
 - **Flexible representation of boxes**
 
-  The toolbox supports three type of bounding boxes, horizontal bounding boxes (HBB), oriented bounding boxes (OBB), and 4 point boxes (POLY). Each type of boxes can transforms to others directly.
+  This toolbox supports three type of bounding boxes, horizontal bounding boxes (HBB), oriented bounding boxes (OBB), and 4 point boxes (POLY). Each type of boxes can transforms to others directly.
 
 - **Efficiency of training and testing big images**
 
-  For dataset like DOTA, OBBDetection can directly merge patch results. So, it's available to validate big image dataset during training, and get the final results directly from testing. Attributing to higher vision of MMdetection, the performance of OBBDetection is better than the [AerialDetection](https://github.com/dingjiansw101/AerialDetection).
+  We optimize the training and testing process of big image datasets. It can directly generate full image results without any postprocessing in [AerialDetection](https://github.com/dingjiansw101/AerialDetection).
+  Besides, our OBBDtection also has a better proformance than [AerialDetection](https://github.com/dingjiansw101/AerialDetection).
   
 
 ## License
@@ -44,7 +44,6 @@ Supported backbones:
 - [x] Res2Net
 
 Supported oriented detection methods:
-- [x] RPN OBB
 - [x] [Faster R-CNN OBB](configs/obb/faster_rcnn_obb)
 - [x] [RetinaNet OBB](configs/obb/retinanet_obb)
 - [x] [Gliding Vertex](configs/obb/gliding_vertex)
@@ -97,7 +96,7 @@ Please refer to [install.md](docs/install.md) for installation and dataset prepa
 
 ### Oriented models training and testing
 
-If you want to train and test a oriented model, please refer to [oriented_model_starting.md](docs/oriented_model_starting.md).
+If you want to train or test a oriented model, please refer to [oriented_model_starting.md](docs/oriented_model_starting.md).
 
 ### How to use MMDetection
 
