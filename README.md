@@ -1,25 +1,26 @@
 # OBBDetection
 
-**news**: We are now updating OBBDetection to new vision based on MMdetection v2.10, which has more advanced models and more efficient features.
+**news**: We are currently developing OBBDetection supported by MMdetection v2.11 which will have more advanced models and more efficient features.
 
 ## introduction
-OBBDetection is a open source oriented object detection toolbox based on the [MMdetection](https://github.com/open-mmlab/mmdetection).
+
+OBBDetection is an oriented object detection toolbox modified from [MMdetection v2.2](https://github.com/open-mmlab/mmdetection).
 
 ![demo image](demo/dota_demo.jpg)
 
 ### Major features
 
-- **MMdetection inheritance**
+- **MMdetection feature inheritance**
 
-  OBBDetection is modified from MMdetection v2.2, where all additive codes are put at newly created folders named **obb**. The structure of MMdetection isn't change, so our OBBDetection inherits all features from MMdetection.
+  OBBDetection doesn't change the structure and codes of original MMdetection and the additive codes are under MMdetection logic. Therefore, our OBBDetection inherits all features from MMdetection.
 
 - **Support of multiple frameworks out of box**
 
-  Except for horizontal detection frameworks, the toolbox supports popular oriented detection frameworks, *e.g.* Faster RCNN OBB, RoI Transformer, Gliding Vertex.
+  We implement multiple oriented object detectors (*e.g.* RoI Transformer, Gliding Vertex). Attributing to moudlar design of MMdetection, Many parts of detectors (*e.g.* backbone, RPN, sampler and assigner) have multiple options.
 
-- **Flexible representation of boxes**
+- **Flexible representation of oriented boxes**
 
-  This toolbox supports three type of bounding boxes, horizontal bounding boxes (HBB), oriented bounding boxes (OBB), and 4 point boxes (POLY). Each type of boxes can transforms to others directly.
+  Three types of boxes are supported in this toolbox, which are horizontal bounding boxes (HBB), oriented bounding boxes (OBB), and 4 point boxes (POLY).
 
 - **Efficiency of training and testing big images**
 
