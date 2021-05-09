@@ -20,7 +20,7 @@ OBBDetection is an oriented object detection toolbox modified from [MMdetection 
 
 - **Flexible representation of oriented boxes**
 
-  Horizontal bounding boxes (HBB), oriented bounding boxes (OBB) and 4 point boxes (POLY) are supported in this toolbox. The program will confirm the type of bounding box by tensor shape or default setting.
+  Horizontal bounding boxes (HBB), oriented bounding boxes (OBB) and 4 point boxes (POLY) are supported in this toolbox. The program will confirm the type of bounding box by the tensor shape or the default setting.
 
 We develop [BboxToolkit](https://github.com/jbwang1997/BboxToolkit) to support oriented bounding boxes operations, which is heavily depended on by this toolbox.
 
