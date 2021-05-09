@@ -22,11 +22,7 @@ OBBDetection is an oriented object detection toolbox modified from [MMdetection 
 
   Three types of boxes are supported in this toolbox, which are horizontal bounding boxes (HBB), oriented bounding boxes (OBB), and 4 point boxes (POLY).
 
-- **Efficiency of training and testing big images**
-
-  We optimize the training and testing process of big image datasets. It can directly generate full image results without any postprocessing in [AerialDetection](https://github.com/dingjiansw101/AerialDetection).
-  Besides, our OBBDtection also has a better proformance than [AerialDetection](https://github.com/dingjiansw101/AerialDetection).
-  
+We developed [BboxToolkit](https://github.com/jbwang1997/BboxToolkit) to support oriented bounding boxes operations, which is heavily depended on by this toolbox.
 
 ## License
 
@@ -105,7 +101,7 @@ If you are not familiar with MMdetection, please see [getting_started.md](docs/g
 
 ## Acknowledgement
 
-This toolbox is based on [MMdetection](https://github.com/open-mmlab/mmdetection). If you use this toolbox or benchmark in your research, please cite the following information.
+This toolbox is modified from [MMdetection](https://github.com/open-mmlab/mmdetection). If you use this toolbox or benchmark in your research, please cite the following information.
 
 ```
 @article{mmdetection,
