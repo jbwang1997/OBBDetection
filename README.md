@@ -1,6 +1,6 @@
 # OBBDetection
 
-**news**: We are currently developing OBBDetection supported by MMdetection v2.11 which will have more advanced models and more efficient features.
+**news**: We are currently developing OBBDetection supported by MMdetection v2.11 which will have more advanced models and more convenient features.
 
 ## introduction
 
@@ -16,13 +16,13 @@ OBBDetection is an oriented object detection toolbox modified from [MMdetection 
 
 - **Support of multiple frameworks out of box**
 
-  We implement multiple oriented object detectors (*e.g.* RoI Transformer, Gliding Vertex). Attributing to moudlar design of MMdetection, Many parts of detectors (*e.g.* backbone, RPN, sampler and assigner) have multiple options.
+  We implement multiple oriented object detectors in this toolbox (*e.g.* RoI Transformer, Gliding Vertex). Attributing to moudlar design of MMdetection, Many parts of detectors (*e.g.* backbone, RPN, sampler and assigner) have multiple options.
 
 - **Flexible representation of oriented boxes**
 
-  Three types of boxes are supported in this toolbox, which are horizontal bounding boxes (HBB), oriented bounding boxes (OBB), and 4 point boxes (POLY).
+  Horizontal bounding boxes (HBB), oriented bounding boxes (OBB) and 4 point boxes (POLY) are supported in this toolbox. The program will confirm the type of bounding box by tensor shape or default setting.
 
-We developed [BboxToolkit](https://github.com/jbwang1997/BboxToolkit) to support oriented bounding boxes operations, which is heavily depended on by this toolbox.
+We develop [BboxToolkit](https://github.com/jbwang1997/BboxToolkit) to support oriented bounding boxes operations, which is heavily depended on by this toolbox.
 
 ## License
 
