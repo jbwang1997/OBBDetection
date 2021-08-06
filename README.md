@@ -24,6 +24,10 @@ OBBDetection is an oriented object detection toolbox modified from [MMdetection 
 
 We develop [BboxToolkit](https://github.com/jbwang1997/BboxToolkit) to support oriented bounding boxes operations, which is heavily depended on by this toolbox.
 
+## Upgrade
+
+We are now developing the support of DOTA1.5, DOTA2.0 and big image inference demo.
+
 ## License
 
 This project is released under the [Apache 2.0 license](LICENSE).
@@ -45,6 +49,7 @@ Supported oriented detection methods:
 - [x] [RetinaNet OBB](configs/obb/retinanet_obb)
 - [x] [Gliding Vertex](configs/obb/gliding_vertex)
 - [x] [RoI Transformer](configs/obb/roi_transformer)
+- [x] [Oriented R-CNN (ICCV'2021)](configs/obb/oriented_rcnn)
 
 Supported horizontal detection methods:
 - [x] [RPN](configs/rpn)
