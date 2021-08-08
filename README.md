@@ -1,6 +1,6 @@
 # OBBDetection
 
-**news**: We are currently developing OBBDetection supported by MMdetection v2.11 which will have more advanced models and more convenient features.
+**news**: We are currently developing DOTA2.0 support, model zoo and big image inference.
 
 ## introduction
 
@@ -23,10 +23,6 @@ OBBDetection is an oriented object detection toolbox modified from [MMdetection 
   Horizontal bounding boxes (HBB), oriented bounding boxes (OBB) and 4 point boxes (POLY) are supported in this toolbox. The program will confirm the type of bounding box by the tensor shape or the default setting.
 
 We develop [BboxToolkit](https://github.com/jbwang1997/BboxToolkit) to support oriented bounding boxes operations, which is heavily depended on by this toolbox.
-
-## Upgrade
-
-We are now developing the support of DOTA1.5, DOTA2.0 and big image inference demo.
 
 ## License
 
