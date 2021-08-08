@@ -1,5 +1,15 @@
+_base_ = './faster_rcnn_obb_r50_fpn_1x_dota10.py'
+
+# model
+model = dict(pretrained='torchvision://resnet101', backbone=dict(depth=101))
+
+# 3x schedules
+lr_config = dict(step=[24, 33])
+total_epochs = 36
+
+# HRSC2016 dataset cfg
 dataset_type = 'HRSCDataset'
-data_root = '/path/to/HRSC/dataset/'
+data_root = 'data/hrsc/'
 img_norm_cfg = dict(
     mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375], to_rgb=True)
 train_pipeline = [
@@ -12,7 +22,7 @@ train_pipeline = [
     dict(type='RandomOBBRotate', rotate_after_flip=True,
          angles=(0, 0), vert_rate=0.5),
     dict(type='Pad', size_divisor=32),
-    dict(type='Mask2OBB', obb_type='poly'),
+    dict(type='Mask2OBB', obb_type='obb'),
     dict(type='OBBDefaultFormatBundle'),
     dict(type='OBBCollect', keys=['img', 'gt_bboxes', 'gt_obboxes', 'gt_labels'])
 ]

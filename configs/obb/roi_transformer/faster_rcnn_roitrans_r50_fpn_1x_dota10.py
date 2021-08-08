@@ -1,5 +1,5 @@
 _base_ = [
-    '../_base_/datasets/ss_dota_obb.py',
+    '../_base_/datasets/dota.py',
     '../_base_/schedules/schedule_1x.py',
     '../../_base_/default_runtime.py'
 ]
@@ -7,10 +7,10 @@ _base_ = [
 
 model = dict(
     type='RoITransformer',
-    pretrained='torchvision://resnet101',
+    pretrained='torchvision://resnet50',
     backbone=dict(
         type='ResNet',
-        depth=101,
+        depth=50,
         num_stages=4,
         out_indices=(0, 1, 2, 3),
         frozen_stages=1,

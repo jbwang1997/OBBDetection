@@ -1,5 +1,15 @@
+_base_ = './retinanet_obb_r50_fpn_1x_dota10.py'
+
+# model
+model = dict(pretrained='torchvision://resnet101', backbone=dict(depth=101))
+
+# 3x schedules
+lr_config = dict(step=[24, 33])
+total_epochs = 36
+
+# HRSC2016 dataset cfg
 dataset_type = 'HRSCDataset'
-data_root = '/path/to/HRSC/dataset/'
+data_root = 'data/hrsc/'
 img_norm_cfg = dict(
     mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375], to_rgb=True)
 train_pipeline = [
@@ -58,7 +68,7 @@ test_pipeline = [
         # ann_file=data_root + 'FullDataSet/Annotations/',
         # img_prefix=data_root + 'FullDataSet/AllImages/',
         # pipeline=test_pipeline))
-# evaluation = dict(metric='mAP')
+# evaluation = None
 
 # disable evluation, only need train and test
 # uncomments it when use trainval as train

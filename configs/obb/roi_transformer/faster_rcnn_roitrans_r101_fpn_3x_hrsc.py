@@ -1,4 +1,7 @@
-_base_ = './gliding_vertex_r50_fpn_1x_dota10.py'
+_base_ = './faster_rcnn_roitrans_r50_fpn_1x_dota10.py'
+
+# model
+model = dict(pretrained='torchvision://resnet101', backbone=dict(depth=101))
 
 # 3x schedules
 lr_config = dict(step=[24, 33])
@@ -19,7 +22,7 @@ train_pipeline = [
     dict(type='RandomOBBRotate', rotate_after_flip=True,
          angles=(0, 0), vert_rate=0.5),
     dict(type='Pad', size_divisor=32),
-    dict(type='Mask2OBB', obb_type='poly'),
+    dict(type='Mask2OBB', obb_type='obb'),
     dict(type='OBBDefaultFormatBundle'),
     dict(type='OBBCollect', keys=['img', 'gt_bboxes', 'gt_obboxes', 'gt_labels'])
 ]
