@@ -18,4 +18,10 @@
 
 ## Results and models
 
-to be continue!!!
+### DOTA1.0
+
+| Backbone |   Data  | Lr schd | Ms | Rotate | box AP |                           Baidu Yun                          |                                         Google Drive                                        |
+|:--------:|:-------:|:-------:|:--:|:------:|:------:|:------------------------------------------------------------:|:-------------------------------------------------------------------------------------------:|
+|  R50-FPN | DOTA1.0 |    1x   |  - |    -   |  72.6  | [key: c7rn](https://pan.baidu.com/s/1XziTNDi6sY2syZn4lfX3uQ) | [model](https://drive.google.com/file/d/1UYr3B0-Or02VAjsYz7w_cmRxeC5qNFga/view?usp=sharing) |
+| R101-FPN | DOTA1.0 |    1x   |  - |    -   |  74.0  | [key: 5a33](https://pan.baidu.com/s/1k2BCMAII6BdjWgwlX_0GCw) |                                              -                                              |
+
