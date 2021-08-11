@@ -102,6 +102,8 @@ If you are not familiar with MMdetection, please see [getting_started.md](docs/g
 
 ## Acknowledgement
 
+We refered [S2ANet](https://github.com/csuhan/s2anet) and [AerialDetection](https://github.com/dingjiansw101/AerialDetection) when develping OBBDetection.
+
 This toolbox is modified from [MMdetection](https://github.com/open-mmlab/mmdetection). If you use this toolbox or benchmark in your research, please cite the following information.
 
 ```
