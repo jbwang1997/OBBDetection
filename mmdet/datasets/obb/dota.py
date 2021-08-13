@@ -5,7 +5,7 @@ import time
 import mmcv
 import numpy as np
 import os.path as osp
-from multiprocessing import Pool
+# from multiprocessing import Pool
 
 from functools import partial
 from mmdet.core import eval_arb_map, eval_arb_recalls
@@ -129,12 +129,7 @@ class DOTADataset(CustomDataset):
             collector[data_info['ori_id']].append(new_result)
 
         merge_func = partial(_merge_func, CLASSES=self.CLASSES, iou_thr=iou_thr, task=task)
-        if nproc > 1:
-            pool = Pool(nproc)
-            merged_results = pool.map(merge_func, list(collector.items()))
-            pool.close()
-        else:
-            merged_results = list(map(merge_func, list(collector.items())))
+        merged_results = mmcv.track_parallel_progress(merge_func, list(collector.items()), nproc)
 
         if save_dir is not None:
             id_list, dets_list = zip(*merged_results)
