@@ -3,7 +3,7 @@ from .obb_two_stage import OBBTwoStageDetector
 
 
 @DETECTORS.register_module()
-class RoITransformer(OBBTwoStageDetector):
+class OrientedRCNN(OBBTwoStageDetector):
 
     def __init__(self,
                  backbone,
@@ -13,7 +13,7 @@ class RoITransformer(OBBTwoStageDetector):
                  train_cfg=None,
                  test_cfg=None,
                  pretrained=None):
-        super(RoITransformer, self).__init__(
+        super(OrientedRCNN, self).__init__(
             backbone=backbone,
             neck=neck,
             rpn_head=rpn_head,

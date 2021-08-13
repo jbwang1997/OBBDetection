@@ -20,6 +20,7 @@ from .ssd_head import SSDHead
 
 from .obb.obb_anchor_head import OBBAnchorHead
 from .obb.obb_retina_head import OBBRetinaHead
+from .obb.oriented_rpn_head import OrientedRPNHead
 
 __all__ = [
     'AnchorFreeHead', 'AnchorHead', 'GuidedAnchorHead', 'FeatureAdaption',
