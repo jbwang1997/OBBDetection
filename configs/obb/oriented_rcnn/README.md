@@ -12,7 +12,7 @@ The second stage is oriented R-CNN head for refining oriented Regions of Interes
 @article{xie2021oriented,
 	title={Oriented R-CNN for Object Detection}, 
 	author={Xingxing Xie and Gong Cheng and Jiabao Wang and Xiwen Yao and Junwei Han},
-    journal={arXiv preprint arXiv:2108.05699},
+	journal={arXiv preprint arXiv:2108.05699},
 	year={2021},
 }
 ```
