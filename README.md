@@ -115,7 +115,18 @@ This toolbox is modified from [MMdetection](https://github.com/open-mmlab/mmdete
              Zhu, Chenchen and Cheng, Tianheng and Zhao, Qijie and Li, Buyu and
              Lu, Xin and Zhu, Rui and Wu, Yue and Dai, Jifeng and Wang, Jingdong
              and Shi, Jianping and Ouyang, Wanli and Loy, Chen Change and Lin, Dahua},
-  journal= {arXiv preprint arXiv:1906.07155},
+  journal = {arXiv preprint arXiv:1906.07155},
   year={2019}
+}
+```
+
+This is the official implement of [Oriented R-CNN](configs/obb/oriented_rcnn). if it is used in your research, please cite the following information.
+
+```
+@article{xie2021oriented,
+  title   = {Oriented R-CNN for Object Detection},
+  author  = {Xie, Xingxing and Cheng, Gong and Wang, Jiabao and Yao, Xiwen and Han, Junwei},
+  journal = {arXiv preprint arXiv:2108.05699},
+  year={2021}
 }
 ```
