@@ -2,10 +2,6 @@
 
 **news**: We are currently developing DOTA2.0 support, model zoo and big image inference.
 
-update: 
-
-- (*2021-08-21*) Reimplement the [PolyIoULoss](configs/obb/poly_iou_loss).
-
 ## introduction
 
 OBBDetection is an oriented object detection toolbox modified from [MMdetection v2.2](https://github.com/open-mmlab/mmdetection).
@@ -31,6 +27,10 @@ We develop [BboxToolkit](https://github.com/jbwang1997/BboxToolkit) to support o
 ## License
 
 This project is released under the [Apache 2.0 license](LICENSE).
+
+## Update
+
+- (**2021-08-21**) Reimplement the [PolyIoULoss](configs/obb/poly_iou_loss).
 
 ## Benchmark and model zoo
 
