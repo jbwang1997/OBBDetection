@@ -328,6 +328,14 @@ if __name__ == '__main__':
                     'src/box_iou_rotated_ext.cpp'
                 ],
                 sources_cuda=['src/box_iou_rotated_cuda.cu']),
+            make_cuda_ext(
+                name='convex_ext',
+                module='mmdet.ops.convex',
+                sources=[
+                    'src/convex_cpu.cpp',
+                    'src/convex_ext.cpp'
+                ],
+                sources_cuda=['src/convex_cuda.cu']),
         ],
         cmdclass={'build_ext': BuildExtension},
         zip_safe=False)
