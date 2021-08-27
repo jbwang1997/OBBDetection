@@ -2,6 +2,10 @@
 
 **news**: We are currently developing DOTA2.0 support, model zoo and big image inference.
 
+update: 
+
+- (*2021-08-21*) Reimplement the [PolyIoULoss](configs/obb/poly_iou_loss).
+
 ## introduction
 
 OBBDetection is an oriented object detection toolbox modified from [MMdetection v2.2](https://github.com/open-mmlab/mmdetection).
@@ -46,6 +50,7 @@ Supported oriented detection methods:
 - [x] [Gliding Vertex](configs/obb/gliding_vertex)
 - [x] [RoI Transformer](configs/obb/roi_transformer)
 - [x] [Oriented R-CNN (ICCV'2021)](configs/obb/oriented_rcnn)
+- [x] [Poly IoU Loss](configs/obb/poly_iou_loss)
 
 Supported horizontal detection methods:
 - [x] [RPN](configs/rpn)

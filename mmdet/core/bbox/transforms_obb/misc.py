@@ -33,6 +33,25 @@ def get_bbox_dim(bbox_type, with_score=False):
     return dim
 
 
+def get_bbox_areas(bboxes):
+    btype = get_bbox_type(bboxes)
+    if btype == 'hbb':
+        wh = bboxes[..., 2:] - bboxes[..., :2]
+        areas = wh[..., 0] * wh[..., 1]
+    elif btype == 'obb':
+        areas = bboxes[..., 2] * bboxes[..., 3]
+    elif btype == 'poly':
+        pts = bboxes.view(*bboxes.size()[:-1], 4, 2)
+        roll_pts = torch.roll(pts, 1, dims=-2)
+        xyxy = torch.sum(pts[..., 0] * roll_pts[..., 1] -
+                         roll_pts[..., 0] * pts[..., 1], dim=-1)
+        areas = 0.5 * torch.abs(xyxy)
+    else:
+        raise ValueError('The type of bboxes is notype')
+
+    return areas
+
+
 def choice_by_type(hbb_op, obb_op, poly_op, bboxes_or_type,
                    with_score=False):
     if isinstance(bboxes_or_type, torch.Tensor):
