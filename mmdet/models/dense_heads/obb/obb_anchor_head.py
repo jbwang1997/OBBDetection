@@ -248,8 +248,10 @@ class OBBAnchorHead(BaseDenseHead):
 
 
         num_valid_anchors = anchors.shape[0]
-        bbox_targets = anchors.new_zeros((anchors.size(0), self.reg_dim))
-        bbox_weights = anchors.new_zeros((anchors.size(0), self.reg_dim))
+        target_dim = self.reg_dim if not self.reg_decoded_bbox else \
+                get_bbox_dim(self.bbox_type)
+        bbox_targets = anchors.new_zeros((anchors.size(0), target_dim))
+        bbox_weights = anchors.new_zeros((anchors.size(0), target_dim))
         labels = anchors.new_full((num_valid_anchors, ),
                                   self.background_label,
                                   dtype=torch.long)
@@ -427,8 +429,10 @@ class OBBAnchorHead(BaseDenseHead):
         loss_cls = self.loss_cls(
             cls_score, labels, label_weights, avg_factor=num_total_samples)
         # regression loss
-        bbox_targets = bbox_targets.reshape(-1, self.reg_dim)
-        bbox_weights = bbox_weights.reshape(-1, self.reg_dim)
+        target_dim = self.reg_dim if not self.reg_decoded_bbox else \
+                get_bbox_dim(self.bbox_type)
+        bbox_targets = bbox_targets.reshape(-1, target_dim)
+        bbox_weights = bbox_weights.reshape(-1, target_dim)
         bbox_pred = bbox_pred.permute(0, 2, 3, 1).reshape(-1, self.reg_dim)
         if self.reg_decoded_bbox:
             anchor_dim = anchors.size(-1)
