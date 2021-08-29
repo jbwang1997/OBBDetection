@@ -15,7 +15,7 @@ The second stage is oriented R-CNN head for refining oriented Regions of Interes
 
 ## Results and models
 
-**note**: The **ms** means multiple scale image split and the **rr** means random rotation.
+**note**: The `ms` means multiple scale image split and the `rr` means random rotation.
 
 ### DOTA dataset
 
@@ -29,11 +29,10 @@ The second stage is oriented R-CNN head for refining oriented Regions of Interes
 
 ### HRSC2016 dataset
 
-
-| Backbone | Lr schd | ms | rr | box AP |                           Baidu Yun                          |                                         Google Drive                                        |
-|:--------:|:-------:|:--:|:--:|:------:|:------------------------------------------------------------:|:-------------------------------------------------------------------------------------------:|
-|  R50-FPN |    3x   |  - |  - |  90.4  | [key: 02zc](https://pan.baidu.com/s/1ISxj1HTumqhD-tjwMYcRhg) | [model](https://drive.google.com/file/d/1K_RvwPMtDl_amR_lMxeiXzVSwNFchPHc/view?usp=sharing) |
-| R101-FPN |    3x   |  - |  - |  90.5  | [key: q3e6](https://pan.baidu.com/s/19x1doXr2qqy7OOTAMKzazA) | [model](https://drive.google.com/file/d/1SZhO4HWzstjbzI3SEwGun2byM3y4p9Bc/view?usp=sharing) |
+| Backbone | Lr schd | ms | rr | voc07 | voc12 |                           Baidu Yun                          |                                         Google Drive                                        |
+|:--------:|:-------:|:--:|:--:|:-----:|:-----:|:------------------------------------------------------------:|:-------------------------------------------------------------------------------------------:|
+|  R50-FPN |    3x   |  - |  - |  90.4 |  96.5 | [key: 02zc](https://pan.baidu.com/s/1ISxj1HTumqhD-tjwMYcRhg) | [model](https://drive.google.com/file/d/1K_RvwPMtDl_amR_lMxeiXzVSwNFchPHc/view?usp=sharing) |
+| R101-FPN |    3x   |  - |  - |  90.5 |  97.5 | [key: q3e6](https://pan.baidu.com/s/19x1doXr2qqy7OOTAMKzazA) | [model](https://drive.google.com/file/d/1SZhO4HWzstjbzI3SEwGun2byM3y4p9Bc/view?usp=sharing) |
 
 ## Citation
 
