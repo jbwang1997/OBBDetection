@@ -45,12 +45,12 @@ Supported backbones:
 - [x] Res2Net
 
 Supported oriented detection methods:
+- [x] [Oriented R-CNN (ICCV'2021)](configs/obb/oriented_rcnn)
+- [x] [Poly IoU Loss](configs/obb/poly_iou_loss)
 - [x] [Faster R-CNN OBB](configs/obb/faster_rcnn_obb)
 - [x] [RetinaNet OBB](configs/obb/retinanet_obb)
 - [x] [Gliding Vertex](configs/obb/gliding_vertex)
 - [x] [RoI Transformer](configs/obb/roi_transformer)
-- [x] [Oriented R-CNN (ICCV'2021)](configs/obb/oriented_rcnn)
-- [x] [Poly IoU Loss](configs/obb/poly_iou_loss)
 
 Supported horizontal detection methods:
 - [x] [RPN](configs/rpn)
