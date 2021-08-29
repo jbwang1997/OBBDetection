@@ -103,8 +103,10 @@ class OBBoxHead(nn.Module):
                                      self.num_classes,
                                      dtype=torch.long)
         label_weights = pos_bboxes.new_zeros(num_samples)
-        bbox_targets = pos_bboxes.new_zeros(num_samples, self.reg_dim)
-        bbox_weights = pos_bboxes.new_zeros(num_samples, self.reg_dim)
+        target_dim = self.reg_dim if not self.reg_decoded_bbox \
+                else get_bbox_dim(self.end_bbox_type)
+        bbox_targets = pos_bboxes.new_zeros(num_samples, target_dim)
+        bbox_weights = pos_bboxes.new_zeros(num_samples, target_dim)
         if num_pos > 0:
             labels[:num_pos] = pos_gt_labels
             pos_weight = 1.0 if cfg.pos_weight <= 0 else cfg.pos_weight
@@ -172,17 +174,19 @@ class OBBoxHead(nn.Module):
             # 0~self.num_classes-1 are FG, self.num_classes is BG
             pos_inds = (labels >= 0) & (labels < bg_class_ind)
             # do not perform bounding box regression for BG anymore.
+            target_dim = self.reg_dim
             if pos_inds.any():
                 if self.reg_decoded_bbox:
                     bbox_pred = self.bbox_coder.decode(rois[:, 1:], bbox_pred)
+                    target_dim = get_bbox_dim(self.end_bbox_type)
                 if self.reg_class_agnostic:
                     pos_bbox_pred = bbox_pred.view(
-                        bbox_pred.size(0), self.reg_dim)[pos_inds.type(torch.bool)]
+                        bbox_pred.size(0), target_dim)[pos_inds.type(torch.bool)]
                 else:
                     pos_bbox_pred = bbox_pred.view(
                         bbox_pred.size(0), -1,
-                        self.reg_dim)[pos_inds.type(torch.bool),
-                                      labels[pos_inds.type(torch.bool)]]
+                        target_dim)[pos_inds.type(torch.bool),
+                                    labels[pos_inds.type(torch.bool)]]
                 losses['loss_bbox'] = self.loss_bbox(
                     pos_bbox_pred,
                     bbox_targets[pos_inds.type(torch.bool)],
