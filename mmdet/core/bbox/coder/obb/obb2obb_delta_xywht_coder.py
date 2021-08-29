@@ -92,7 +92,7 @@ def delta2obb(proposals,
     gy = dx*pw*torch.sin(-ptheta) + dy*ph*torch.cos(-ptheta) + py
     gw = pw * dw.exp()
     gh = ph * dh.exp()
-    gtheta = regular_theta(dtheta + ptheta)
+    gtheta = dtheta + ptheta
 
     bboxes = torch.stack([gx, gy, gw, gh, gtheta], dim=-1)
     bboxes = regular_obb(bboxes)
