@@ -73,11 +73,17 @@ at::Tensor convex_sort_cpu_kernel(
             break;
           }
           else {
-	    c_i--;
-	    x1 = sub_x[sub_convex_index[c_i]];
-	    y1 = sub_y[sub_convex_index[c_i]];
-	    x2 = sub_x[sub_convex_index[c_i - 1]];
-	    y2 = sub_y[sub_convex_index[c_i - 1]];
+	    if (c_i <= 1) {
+	      sub_convex_index[c_i] = j;
+	      break;
+	    }
+	    else {
+	      c_i--;
+	      x1 = sub_x[sub_convex_index[c_i]];
+	      y1 = sub_y[sub_convex_index[c_i]];
+	      x2 = sub_x[sub_convex_index[c_i - 1]];
+	      y2 = sub_y[sub_convex_index[c_i - 1]];
+	    }
 	  }
         }
       }
