@@ -1,4 +1,4 @@
-# RetinaNet OBB
+# [RetinaNet OBB](https://arxiv.org/pdf/1708.02002.pdf)
 
 ## Introduction
 

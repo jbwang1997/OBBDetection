@@ -1,4 +1,4 @@
-# Gliding Vertex on the Horizontal Bounding Box for Multi-Oriented Object Detection
+# [Gliding Vertex on the Horizontal Bounding Box for Multi-Oriented Object Detection](https://arxiv.org/pdf/1911.09358.pdf)
 
 ## Introduction
 ```
