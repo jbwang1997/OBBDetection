@@ -28,6 +28,7 @@ from .obb.retinanet_obb import RetinaNetOBB
 from .obb.gliding_vertex import GlidingVertex
 from .obb.obb_rpn import OBBRPN
 from .obb.oriented_rcnn import OrientedRCNN
+from .obb.fcos_obb import FCOSOBB
 
 __all__ = [
     'ATSS', 'BaseDetector', 'SingleStageDetector', 'TwoStageDetector', 'RPN',

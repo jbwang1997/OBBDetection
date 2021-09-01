@@ -300,7 +300,10 @@ class RandomOBBRotate(object):
             if 'cls' not in results:
                 raise ValueError(
                     'need class order when vert_cls is not None')
-            vert_lbls = [results['cls'].index(c) for c in  self.vert_cls]
+            vert_lbls, cls_list = [], results['cls']
+            for c in self.vert_cls:
+                if c in cls_list:
+                    vert_lbls.append(cls_list.index(c))
             if 'gt_labels' in results:
                 labels = results['gt_labels']
                 for i in vert_lbls:

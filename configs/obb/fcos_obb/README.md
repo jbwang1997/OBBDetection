@@ -13,4 +13,12 @@ The oriented form of fcos.
 }
 ```
 
+In order to predict direction, I add an one channel convolution layer on the top of the regression features.
+I concatenate the 4-dim bbox predtions and 1-dim theta predictions as the final obb predictions.
+following original FCOS, I use the PolyIoULoss between the obb predictions and ground-truths as the loss of bboxes.
+
+**note**: Cannot predict left, right, up, bottom targets with theta togather, because direction predictions cannot share same scale module with distance preditions.
+
+## Results
+
 To be continue!!!

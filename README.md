@@ -30,6 +30,7 @@ This project is released under the [Apache 2.0 license](LICENSE).
 
 ## Update
 
+- (**2021-09-01**) Implement [FCOS OBB](configs/obb/fcos_obb) in the OBBDetection.
 - (**2021-08-21**) Reimplement the [PolyIoULoss](configs/obb/poly_iou_loss).
 
 ## Benchmark and model zoo
@@ -51,6 +52,7 @@ Supported oriented detection methods:
 - [x] [RetinaNet OBB](configs/obb/retinanet_obb)
 - [x] [Gliding Vertex](configs/obb/gliding_vertex)
 - [x] [RoI Transformer](configs/obb/roi_transformer)
+- [x] [FCOS OBB](configs/obb/fcos_obb)
 
 Supported horizontal detection methods:
 - [x] [RPN](configs/rpn)
