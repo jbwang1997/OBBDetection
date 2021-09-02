@@ -21,4 +21,7 @@ following original FCOS, I use the PolyIoULoss between the obb predictions and g
 
 ## Results
 
-To be continue!!!
+
+| Backbone |   Data  | Lr schd | center sampling | norm on bbox | box AP |
+|:--------:|:-------:|:-------:|:---------------:|:------------:|:------:|
+|  R50-FPN | DOTA1.0 |    1x   |        -        |       -      |  72.1  |

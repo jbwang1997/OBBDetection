@@ -20,5 +20,5 @@ Faster R-CNN towards oriented detection. Predicts the angles of objects in secon
 
 | Backbone | Data | Lr schd | Ms | Rotate | box AP | Baidu Yun | Google Drive |
 |:--------:|:----:|:-------:|:--:|:------:|:------:|:---------:|:------------:|
-|  R50-FPN | HRSC |    1x   |  - |    -   |  80.9  |     -     |       -      |
-|  R50-FPN | HRSC |    1x   |  - |    -   |  84.6  |     -     |       -      |
+|  R50-FPN | HRSC |    3x   |  - |    -   |  80.9  |     -     |       -      |
+|  R50-FPN | HRSC |    3x   |  - |    -   |  84.6  |     -     |       -      |
