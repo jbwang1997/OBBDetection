@@ -2,21 +2,38 @@
 
 This page provides the basic tutorials for training and testing oriented models.
 
+## Huge Image Demo
+
+We provide a demo script to test a single huge image, like DOTA images.
+
+```shell
+python demo/huge_image_demo.py ${IMAGE_FILE} ${CONFIG_FILE} ${CHECKPOINT_FILE} ${SPLIT_CONFIG_FILE} \
+	 [--device ${GPU_ID}] [--score-thr ${SCORE_THR}]
+```
+
+You can get a pretrained checkpoint from every models' [README.md](./../configs/obb/).
+
+example
+```shell
+python demo/huge_image_demo.py demo/dota_demo.png configs/obb/oriented_rcnn/faster_rcnn_orpn_r50_fpn_1x_dota10.py \
+	 ckpt/faster_rcnn_orpn_r50_fpn_1x_dota10_epoch12.pth BboxToolkit/tools/split_configs/dota1_0/ss_test.json
+```
+
 ## Prepare dataset
 
 All config files of oriented object datasets are put at `<OBBDet>/configs/obb/_base_/dataset`. Before training and testing, you need to add the dataset path to config files.
 
-Especially, DOTA dataset need to be splitted and add the splitted dataset path to DOTA config files. We develop a script **img_split.py** at `<OBBDet>/BboxToolkit/tools/` to split images and generate patch labels.
-The simplest way to use **img_split.py** is loading the json config in `BboxToolkit/tools/split_configs`. Please refer to [USAGE.md](https://github.com/jbwang1997/BboxToolkit/USAGE.md) for the details of **img_split.py**.
+Especially, DOTA dataset need to be splitted and add the splitted dataset path to DOTA config files. We develop a script `img_split.py` at `<OBBDet>/BboxToolkit/tools/` to split images and generate patch labels.
+The simplest way to use `img_split.py` is loading the json config in `BboxToolkit/tools/split_configs`. Please refer to [USAGE.md](https://github.com/jbwang1997/BboxToolkit/USAGE.md) for the details of `img_split.py`.
 
 **example**
 ```shell
 cd BboxToolkit/tools/
-# modify the img_dirs ann_dirs and save_dir in ss_dota_train.json
-python img_split.py --base_json split_configs/ss_dota_train.json
+# modify the img_dirs, ann_dirs and save_dir in split_configs/dota1_0/ss_dota_train.json
+python img_split.py --base_json split_configs/dota1_0/ss_dota_train.json
 ```
 
-**note**: the 'ss' and 'ms' mean 'single scale' and 'multiple scales'.
+**note**: the `ss` and `ms` mean `single scale splitting` and `multiple scales`.
 
 ## training
 
