@@ -173,14 +173,20 @@ class OBBRPN(OBBBaseDetector, RotateAugRPNTestMixin):
                     out_file=None,
                     score_thr=None):
         img = mmcv.imread(img)
-        bboxes = result[:, :-1]
+        bboxes, scores = result[:, :-1], result[:, -1]
+        idx = scores.argsort()[::-1]
+        bboxes = bboxes[idx]
+
+        top_k = min(top_k, len(bboxes))
+        bboxes = bboxes[:top_k, :]
+
         if out_file is not None:
             show = False
         bt.imshow_bboxes(img,
                          bboxes,
                          colors=colors,
-                         top_k=top_k,
                          thickness=thickness,
+                         with_text=False,
                          show=show,
                          win_name=win_name,
                          wait_time=wait_time,

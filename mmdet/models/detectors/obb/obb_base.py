@@ -12,10 +12,9 @@ class OBBBaseDetector(BaseDetector):
                     img,
                     result,
                     score_thr=0.3,
-                    bbox_color='green',
-                    text_color='green',
-                    thickness=1,
-                    font_scale=0.5,
+                    colors='green',
+                    thickness=1.,
+                    font_size=10,
                     win_name='',
                     show=False,
                     wait_time=0,
@@ -54,17 +53,16 @@ class OBBBaseDetector(BaseDetector):
             show = False
         # draw bounding boxes
         bboxes, scores = bboxes[:, :-1], bboxes[:, -1]
-        bt.imshow_det_bboxes(
+        bt.imshow_bboxes(
             img,
             bboxes,
             labels,
             scores=scores,
             class_names=self.CLASSES,
             score_thr=score_thr,
-            bbox_color=bbox_color,
-            text_color=text_color,
+            colors=colors,
             thickness=thickness,
-            font_scale=font_scale,
+            font_size=font_size,
             win_name=win_name,
             show=show,
             wait_time=wait_time,
