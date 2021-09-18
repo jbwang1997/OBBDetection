@@ -30,6 +30,7 @@ This project is released under the [Apache 2.0 license](LICENSE).
 
 ## Update
 
+- (**2021-09-18**) Implement [Double Head OBB](configs/obb/double_heads_obb) in the OBBDetection.
 - (**2021-09-01**) Implement [FCOS OBB](configs/obb/fcos_obb) in the OBBDetection.
 - (**2021-08-21**) Reimplement the [PolyIoULoss](configs/obb/poly_iou_loss).
 
@@ -49,6 +50,7 @@ Supported oriented detection methods:
 - [x] [Oriented R-CNN (ICCV'2021)](configs/obb/oriented_rcnn)
 - [x] [Poly IoU Loss](configs/obb/poly_iou_loss)
 - [x] [Faster R-CNN OBB](configs/obb/faster_rcnn_obb)
+- [x] [Double Head OBB](configs/obb/double_heads_obb)
 - [x] [RetinaNet OBB](configs/obb/retinanet_obb)
 - [x] [Gliding Vertex](configs/obb/gliding_vertex)
 - [x] [RoI Transformer](configs/obb/roi_transformer)
