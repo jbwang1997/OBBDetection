@@ -6,6 +6,7 @@ from .double_bbox_head import DoubleConvFCBBoxHead
 from .obb.obbox_head import OBBoxHead
 from .obb.obb_convfc_bbox_head import (OBBConvFCBBoxHead, OBBShared2FCBBoxHead,
                                        OBBShared4Conv1FCBBoxHead)
+from .obb.obb_double_bbox_head import OBBDoubleConvFCBBoxHead
 from .obb.gv_bbox_head import GVBBoxHead
 
 __all__ = [

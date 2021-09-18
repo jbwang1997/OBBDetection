@@ -18,6 +18,7 @@ from .obb.obb_base_roi_head import OBBBaseRoIHead
 from .obb.roitrans_roi_head import RoITransRoIHead
 from .obb.obb_standard_roi_head import OBBStandardRoIHead
 from .obb.gv_ratio_roi_head import GVRatioRoIHead
+from .obb.obb_double_roi_head import OBBDoubleHeadRoIHead
 
 __all__ = [
     'BaseRoIHead', 'CascadeRoIHead', 'DoubleHeadRoIHead', 'MaskScoringRoIHead',
