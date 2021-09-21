@@ -18,11 +18,7 @@ def poly2obb(polys):
     obboxes = []
     for poly in polys_np:
         (x, y), (w, h), angle = cv2.minAreaRect(poly)
-        if w >= h:
-            angle = -angle
-        else:
-            w, h = h, w
-            angle = -90 - angle
+        angle = -angle
         theta = angle / 180 * pi
         obboxes.append([x, y, w, h, theta])
 
@@ -31,6 +27,7 @@ def poly2obb(polys):
     else:
         obboxes = np.array(obboxes)
 
+    obboxes = regular_obb(obboxes)
     obboxes = obboxes.reshape(*order, 5)
     return polys.new_tensor(obboxes)
 
