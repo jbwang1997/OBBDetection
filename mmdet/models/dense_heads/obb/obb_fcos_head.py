@@ -527,10 +527,9 @@ class OBBFCOSHead(OBBAnchorFreeHead):
         # if center_sampling is true, also in center bbox.
         inside_gt_bbox_mask = bbox_targets.min(-1)[0] > 0
         if self.center_sampling:
-            # condition1: inside a `center bbox`
+            # inside a `center bbox`
             radius = self.center_sample_radius
-            center_xs, center_ys = gt_bboxes[..., 0], gt_bboxes[..., 1]
-            stride = center_xs.new_zeros(center_xs.shape)
+            stride = offset.new_zeros(offset.shape)
 
             # project the points on current lvl back to the `original` sizes
             lvl_begin = 0
@@ -539,20 +538,7 @@ class OBBFCOSHead(OBBAnchorFreeHead):
                 stride[lvl_begin:lvl_end] = self.strides[lvl_idx] * radius
                 lvl_begin = lvl_end
 
-            x_mins = center_xs - stride
-            y_mins = center_ys - stride
-            x_maxs = center_xs + stride
-            y_maxs = center_ys + stride
-
-            xs, ys = points[..., 0], points[..., 1]
-            cb_dist_left = xs - x_mins
-            cb_dist_right = x_maxs - xs
-            cb_dist_top = ys - y_mins
-            cb_dist_bottom = y_maxs - ys
-            center_bbox = torch.stack(
-                (cb_dist_left, cb_dist_top, cb_dist_right, cb_dist_bottom), -1)
-
-            inside_center_bbox_mask = center_bbox.min(-1)[0] > 0
+            inside_center_bbox_mask = (abs(offset) < stride).all(dim=-1)
             inside_gt_bbox_mask = torch.logical_and(
                 inside_center_bbox_mask, inside_gt_bbox_mask)
 
