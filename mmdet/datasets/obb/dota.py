@@ -1,5 +1,6 @@
 import BboxToolkit as bt
 
+import os
 import cv2
 import time
 import mmcv
@@ -76,6 +77,7 @@ class DOTADataset(CustomDataset):
                        nproc=4,
                        save_dir=None,
                        **kwargs):
+        nproc = min(nproc, os.cpu_count())
         task = self.task
         if mmcv.is_list_of(results, tuple):
             dets, segments = results
@@ -128,8 +130,19 @@ class DOTADataset(CustomDataset):
             new_result = np.concatenate(new_result, axis=0)
             collector[data_info['ori_id']].append(new_result)
 
-        merge_func = partial(_merge_func, CLASSES=self.CLASSES, iou_thr=iou_thr, task=task)
-        merged_results = mmcv.track_parallel_progress(merge_func, list(collector.items()), nproc)
+        merge_func = partial(
+            _merge_func,
+            CLASSES=self.CLASSES,
+            iou_thr=iou_thr,
+            task=task)
+        if nproc <= 1:
+            print('Single processing')
+            merged_results = mmcv.track_iter_progress(
+                (map(merge_func, collector.items()), len(collector)))
+        else:
+            print('Multiple processing')
+            merged_results = mmcv.track_parallel_progress(
+                merge_func, list(collector.items()), nproc)
 
         if save_dir is not None:
             id_list, dets_list = zip(*merged_results)
@@ -153,6 +166,7 @@ class DOTADataset(CustomDataset):
                  eval_iou_thr=[0.5],
                  proposal_nums=(2000, ),
                  nproc=10):
+        nproc = min(nproc, os.cpu_count())
         if not isinstance(metric, str):
             assert len(metric) == 1
             metric = metric[0]
