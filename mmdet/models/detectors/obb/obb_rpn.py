@@ -182,12 +182,14 @@ class OBBRPN(OBBBaseDetector, RotateAugRPNTestMixin):
 
         if out_file is not None:
             show = False
-        bt.imshow_bboxes(img,
-                         bboxes,
-                         colors=colors,
-                         thickness=thickness,
-                         with_text=False,
-                         show=show,
-                         win_name=win_name,
-                         wait_time=wait_time,
-                         out_file=out_file)
+        img = bt.imshow_bboxes(
+            img,
+            bboxes,
+            colors=colors,
+            thickness=thickness,
+            with_text=False,
+            show=show,
+            win_name=win_name,
+            wait_time=wait_time,
+            out_file=out_file)
+        return img
