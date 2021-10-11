@@ -1,7 +1,6 @@
-# [Oriented R-CNN for Object Detection](https://arxiv.org/abs/2108.05699v1)
+# [Oriented R-CNN for Object Detection](https://openaccess.thecvf.com/content/ICCV2021/papers/Xie_Oriented_R-CNN_for_Object_Detection_ICCV_2021_paper.pdf)
 
 > Xingxiing Xie, Gong Cheng, Jiabao Wang, Xiwen Yao, Junwei Han,
-> arxiv preprint ([arXiv:2108.05699](https://arxiv.org/abs/2108.05699v1)).
 
 ## Introduction
 
@@ -37,10 +36,11 @@ The second stage is oriented R-CNN head for refining oriented Regions of Interes
 ## Citation
 
 ```
-@article{xie2021oriented,
-	title={Oriented R-CNN for Object Detection}, 
-	author={Xingxing Xie and Gong Cheng and Jiabao Wang and Xiwen Yao and Junwei Han},
-	journal={arXiv preprint arXiv:2108.05699},
-	year={2021},
-}
+@InProceedings{Xie_2021_ICCV,
+  author = {Xie, Xingxing and Cheng, Gong and Wang, Jiabao and Yao, Xiwen and Han, Junwei},
+  title = {Oriented R-CNN for Object Detection},
+  booktitle = {Proceedings of the IEEE/CVF International Conference on Computer Vision (ICCV)},
+  month = {October},
+  year = {2021},
+  pages = {3520-3529} }
 ```
