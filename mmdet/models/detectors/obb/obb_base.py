@@ -53,13 +53,11 @@ class OBBBaseDetector(BaseDetector):
             show = False
         # draw bounding boxes
         bboxes, scores = bboxes[:, :-1], bboxes[:, -1]
+        bboxes = bboxes[scores > score_thr]
+        scores = scores[scores > score_thr]
         img = bt.imshow_bboxes(
-            img,
-            bboxes,
-            labels,
-            scores=scores,
+            img, bboxes, labels, scores,
             class_names=self.CLASSES,
-            score_thr=score_thr,
             colors=colors,
             thickness=thickness,
             font_size=font_size,

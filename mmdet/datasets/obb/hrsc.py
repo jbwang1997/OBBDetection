@@ -12,15 +12,20 @@ from ..custom import CustomDataset
 @DATASETS.register_module()
 class HRSCDataset(CustomDataset):
 
-    CLASSES = bt.get_classes('hrsc')
+    CLASSES = None
 
     def __init__(self,
                  imgset,
+                 classwise,
                  ann_file,
                  img_prefix,
                  *args,
                  **kwargs):
         self.imgset = imgset
+        if classwise:
+            HRSCDataset.CLASSES = bt.get_classes('hrsc_cls')
+        else:
+            HRSCDataset.CLASSES = bt.get_classes('hrsc')
         super(HRSCDataset, self).__init__(*args,
                                           ann_file=ann_file,
                                           img_prefix=img_prefix,
