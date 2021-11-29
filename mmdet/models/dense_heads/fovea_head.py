@@ -3,7 +3,7 @@ import torch.nn as nn
 from mmcv.cnn import ConvModule, normal_init
 
 from mmdet.core import multi_apply, multiclass_nms
-from mmdet.ops import DeformConv
+from mmcv.ops import DeformConv2d
 from ..builder import HEADS
 from .anchor_free_head import AnchorFreeHead
 
@@ -21,12 +21,12 @@ class FeatureAlign(nn.Module):
         offset_channels = kernel_size * kernel_size * 2
         self.conv_offset = nn.Conv2d(
             4, deformable_groups * offset_channels, 1, bias=False)
-        self.conv_adaption = DeformConv(
+        self.conv_adaption = DeformConv2d(
             in_channels,
             out_channels,
             kernel_size=kernel_size,
             padding=(kernel_size - 1) // 2,
-            deformable_groups=deformable_groups)
+            deform_groups=deformable_groups)
         self.relu = nn.ReLU(inplace=True)
 
     def init_weights(self):

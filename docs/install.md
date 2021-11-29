@@ -7,7 +7,7 @@
 - PyTorch 1.3+
 - CUDA 9.2+ (If you build PyTorch from source, CUDA 9.0 is also compatible)
 - GCC 5+
-- [mmcv 0.6.2](https://github.com/open-mmlab/mmcv)
+- [mmcv > 1.3](https://github.com/open-mmlab/mmcv)
 - [BboxToolkit 1.0](https://github.com/jbwang1997/BboxToolkit)
 
 ### Install OBBDetection
@@ -54,16 +54,28 @@ cd OBBDetection
 
 d. Install build requirements and then install OBBDetection.
 
+- install the BboxToolkit
+
 ```shell
-# install the BboxToolkit
 cd BboxToolkit
 pip install -v -e .  # or "python setup.py develop"
 cd ..
+```
 
-# install the OBBDetection
+- install mmcv-full
+
+Please refer to [mmcv-full](https://github.com/open-mmlab/mmcv) to select a compatible version of mmcv-full 
+```shell
+# example
+pip install mmcv-full==1.3.9 -f https://download.openmmlab.com/mmcv/dist/cu111/torch1.9.0/index.html
+# Here, the version of cuda and torch should be the same with your environment.
+```
+
+- install OBBDetection
+
+```
 pip install -r requirements/build.txt
 pip install mmpycocotools
-pip install mmcv==0.6.2
 pip install -v -e .  # or "python setup.py develop"
 ```
 

@@ -251,22 +251,6 @@ if __name__ == '__main__':
                 sources=['src/roi_pool_ext.cpp'],
                 sources_cuda=['src/cuda/roi_pool_kernel.cu']),
             make_cuda_ext(
-                name='deform_conv_ext',
-                module='mmdet.ops.dcn',
-                sources=['src/deform_conv_ext.cpp'],
-                sources_cuda=[
-                    'src/cuda/deform_conv_cuda.cpp',
-                    'src/cuda/deform_conv_cuda_kernel.cu'
-                ]),
-            make_cuda_ext(
-                name='deform_pool_ext',
-                module='mmdet.ops.dcn',
-                sources=['src/deform_pool_ext.cpp'],
-                sources_cuda=[
-                    'src/cuda/deform_pool_cuda.cpp',
-                    'src/cuda/deform_pool_cuda_kernel.cu'
-                ]),
-            make_cuda_ext(
                 name='sigmoid_focal_loss_ext',
                 module='mmdet.ops.sigmoid_focal_loss',
                 sources=['src/sigmoid_focal_loss_ext.cpp'],
@@ -278,22 +262,6 @@ if __name__ == '__main__':
                 sources_cuda=[
                     'src/cuda/masked_conv2d_cuda.cpp',
                     'src/cuda/masked_conv2d_kernel.cu'
-                ]),
-            make_cuda_ext(
-                name='carafe_ext',
-                module='mmdet.ops.carafe',
-                sources=['src/carafe_ext.cpp'],
-                sources_cuda=[
-                    'src/cuda/carafe_cuda.cpp',
-                    'src/cuda/carafe_cuda_kernel.cu'
-                ]),
-            make_cuda_ext(
-                name='carafe_naive_ext',
-                module='mmdet.ops.carafe',
-                sources=['src/carafe_naive_ext.cpp'],
-                sources_cuda=[
-                    'src/cuda/carafe_naive_cuda.cpp',
-                    'src/cuda/carafe_naive_cuda_kernel.cu'
                 ]),
             make_cuda_ext(
                 name='corner_pool_ext',

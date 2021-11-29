@@ -6,7 +6,7 @@ from mmdet.core import (anchor_inside_flags, build_anchor_generator,
                         build_assigner, build_bbox_coder, build_sampler,
                         calc_region, force_fp32, images_to_levels, multi_apply,
                         multiclass_nms, unmap)
-from mmdet.ops import DeformConv, MaskedConv2d
+from mmcv.ops import DeformConv2d, MaskedConv2d
 from ..builder import HEADS, build_loss
 from .anchor_head import AnchorHead
 
@@ -34,12 +34,12 @@ class FeatureAdaption(nn.Module):
         offset_channels = kernel_size * kernel_size * 2
         self.conv_offset = nn.Conv2d(
             2, deformable_groups * offset_channels, 1, bias=False)
-        self.conv_adaption = DeformConv(
+        self.conv_adaption = DeformConv2d(
             in_channels,
             out_channels,
             kernel_size=kernel_size,
             padding=(kernel_size - 1) // 2,
-            deformable_groups=deformable_groups)
+            deform_groups=deformable_groups)
         self.relu = nn.ReLU(inplace=True)
 
     def init_weights(self):
