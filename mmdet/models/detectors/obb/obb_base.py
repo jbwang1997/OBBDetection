@@ -54,6 +54,7 @@ class OBBBaseDetector(BaseDetector):
         # draw bounding boxes
         bboxes, scores = bboxes[:, :-1], bboxes[:, -1]
         bboxes = bboxes[scores > score_thr]
+        labels = labels[scores > score_thr]
         scores = scores[scores > score_thr]
         img = bt.imshow_bboxes(
             img, bboxes, labels, scores,

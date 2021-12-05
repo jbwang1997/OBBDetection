@@ -62,7 +62,7 @@ class LoadPatch(object):
 
         patch = img[y_start:y_stop, x_start:x_stop]
         if ph_h > patch.shape[0] or ph_w > patch.shape[1]:
-            patch = mmcv.impad(patch, (ph_h, ph_w), self.fill)
+            patch = mmcv.impad(patch, shape=(ph_h, ph_w), pad_val=self.fill)
 
         results['img'] = patch
         results['img_fields'] = ['img']
