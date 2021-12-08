@@ -103,7 +103,7 @@ class S2AHead(BaseDenseHead):
                 head_module.num_anchors = self.num_anchors
             self.heads.append(head_module)
 
-        self.num_stage = len(self.heads)
+        self.num_stages = len(self.heads)
         self.feat_channels = feat_channels
         self.align_type = align_type
         assert align_type in ['Conv', 'DCN', 'AlignConv']
@@ -130,7 +130,12 @@ class S2AHead(BaseDenseHead):
 
     def init_weights(self):
         """Initialize weights of the head."""
+        for head in self.heads:
+            head.init_weights()
         self.align_conv.init_weights()
+
+    def loss(self, **kwargs):
+        raise Exception
 
     def get_anchors(self, featmap_sizes, img_metas, device='cuda'):
         """Get anchors according to feature map sizes.
@@ -225,7 +230,7 @@ class S2AHead(BaseDenseHead):
     def forward(self, feats):
         prior_anchors = None
         for i in range(self.num_stages):
-            with_anchor = True if i != (self.num_stage - 1) else False
+            with_anchor = True if i != (self.num_stages - 1) else False
             outs = self.heads[i](feats, prior_anchors)
             if with_anchor:
                 prior_anchors = self.get_pred_anchors(outs, i, prior_anchors)
@@ -244,7 +249,7 @@ class S2AHead(BaseDenseHead):
         feat = x
         prior_anchors = None
         for i in range(self.num_stages):
-            with_anchor = True if i != (self.num_stage - 1) else False
+            with_anchor = True if i != (self.num_stages - 1) else False
             result_dict = self._bbox_forward_train(i, feat, gt_obboxes,
                                                    gt_labels, img_metas,
                                                    gt_bboxes_ignore, prior_anchors,
