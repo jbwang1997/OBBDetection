@@ -304,6 +304,13 @@ if __name__ == '__main__':
                     'src/convex_ext.cpp'
                 ],
                 sources_cuda=['src/convex_cuda.cu']),
+            make_cuda_ext(
+                name='orn_cuda',
+                module='mmdet.ops.orn',
+                sources=['src/vision.cpp',
+                         'src/cpu/ActiveRotatingFilter_cpu.cpp', 'src/cpu/RotationInvariantEncoding_cpu.cpp',
+                         'src/cuda/ActiveRotatingFilter_cuda.cu', 'src/cuda/RotationInvariantEncoding_cuda.cu',
+                         ]),
         ],
         cmdclass={'build_ext': BuildExtension},
         zip_safe=False)

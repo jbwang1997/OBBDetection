@@ -1,0 +1,264 @@
+import torch
+import torch.nn as nn
+from mmcv.cnn import ConvModule, bias_init_with_prob, normal_init
+from mmcv.ops import DeformConv2dPack, DeformConv2d
+
+from mmdet.core import get_bbox_dim, build_anchor_generator
+from mmdet.models.builder import HEADS, build_head
+from .obb_anchor_head import OBBAnchorHead
+from ..base_dense_head import BaseDenseHead
+
+
+class AlignConv(nn.Module):
+
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 kernel_size=3,
+                 deform_groups=1):
+        super(AlignConv, self).__init__()
+        self.kernel_size = kernel_size
+        self.deform_conv = DeformConv2d(in_channels,
+                                        out_channels,
+                                        kernel_size=kernel_size,
+                                        padding=(kernel_size - 1) // 2,
+                                        deform_groups=deform_groups)
+        self.relu = nn.ReLU(inplace=True)
+
+    def init_weights(self):
+        normal_init(self.deform_conv, std=0.01)
+
+    @torch.no_grad()
+    def get_offset(self, anchors, featmap_size, stride):
+        dtype, device = anchors.dtype, anchors.device
+        feat_h, feat_w = featmap_size
+        pad = (self.kernel_size - 1) // 2
+        idx = torch.arange(-pad, pad + 1, dtype=dtype, device=device)
+        yy, xx = torch.meshgrid(idx, idx)
+        xx = xx.reshape(-1)
+        yy = yy.reshape(-1)
+
+        # get sampling locations of default conv
+        xc = torch.arange(0, feat_w, device=device, dtype=dtype)
+        yc = torch.arange(0, feat_h, device=device, dtype=dtype)
+        yc, xc = torch.meshgrid(yc, xc)
+        xc = xc.reshape(-1)
+        yc = yc.reshape(-1)
+        x_conv = xc[:, None] + xx
+        y_conv = yc[:, None] + yy
+
+        # get sampling locations of anchors
+        x_ctr, y_ctr, w, h, a = torch.unbind(anchors, dim=1)
+        x_ctr, y_ctr, w, h = x_ctr / stride, y_ctr / stride, w / stride, h / stride
+        cos, sin = torch.cos(a), torch.sin(a)
+        dw, dh = w / self.kernel_size, h / self.kernel_size
+        x, y = dw[:, None] * xx, dh[:, None] * yy
+        xr = cos[:, None] * x - sin[:, None] * y
+        yr = sin[:, None] * x + cos[:, None] * y
+        x_anchor, y_anchor = xr + x_ctr[:, None], yr + y_ctr[:, None]
+        # get offset filed
+        offset_x = x_anchor - x_conv
+        offset_y = y_anchor - y_conv
+        # x, y in anchors is opposite in image coordinates,
+        # so we stack them with y, x other than x, y
+        offset = torch.stack([offset_y, offset_x], dim=-1)
+        # NA,ks*ks*2
+        offset = offset.reshape(anchors.size(
+            0), -1).permute(1, 0).reshape(-1, feat_h, feat_w)
+        return offset
+
+    def forward(self, x, anchors, stride):
+        num_imgs, H, W = anchors.shape[:3]
+        offset_list = [
+            self.get_offset(anchors[i].reshape(-1, 5), (H, W), stride)
+            for i in range(num_imgs)
+        ]
+        offset_tensor = torch.stack(offset_list, dim=0)
+        x = self.relu(self.deform_conv(x, offset_tensor))
+        return x
+
+
+@HEADS.register_module()
+class S2AHead(BaseDenseHead):
+
+    def __init__(self,
+                 heads,
+                 feat_channels=256,
+                 align_type='AlignConv',
+                 train_cfg=None,
+                 test_cfg=None):
+        super(S2AHead, self).__init__()
+
+        self.heads = []
+        for i, (head, cfg) in enumerate(zip(heads, train_cfg)):
+            head.update(train_cfg=cfg)
+            head.update(test_cfg=test_cfg)
+            head_module = build_head(head)
+            # TODO 说明
+            if i == 0:
+                self.anchor_generator = head_module.anchor_generator
+                self.num_anchors = head_module.num_anchors
+            else:
+                head_module.anchor_generator = self.anchor_generator
+                head_module.num_anchors = self.num_anchors
+            self.heads.append(head_module)
+
+        self.num_stage = len(self.heads)
+        self.feat_channels = feat_channels
+        self.align_type = align_type
+        assert align_type in ['Conv', 'DCN', 'AlignConv']
+        if align_type == 'Conv':
+            self.align_conv = ConvModule(feat_channels,
+                                         feat_channels,
+                                         kernel_size=3,
+                                         stride=1,
+                                         padding=1)
+        elif align_type == 'DCN':
+            self.align_conv = DeformConv2dPack(feat_channels,
+                                               feat_channels,
+                                               kernel_size=3,
+                                               stride=1,
+                                               padding=1,
+                                               deform_groups=1)
+        elif align_type == 'AlignConv':
+            self.align_conv = AlignConv(feat_channels,
+                                        feat_channels,
+                                        kernel_size=3,
+                                        deform_groups=1)
+        self.bbox_type = 'obb'
+        self.reg_dim = get_bbox_dim(self.bbox_type)
+
+    def init_weights(self):
+        """Initialize weights of the head."""
+        self.align_conv.init_weights()
+
+    def get_anchors(self, featmap_sizes, img_metas, device='cuda'):
+        """Get anchors according to feature map sizes.
+
+        Args:
+            featmap_sizes (list[tuple]): Multi-level feature map sizes.
+            img_metas (list[dict]): Image meta info.
+            device (torch.device | str): Device for returned tensors
+
+        Returns:
+            tuple:
+                anchor_list (list[Tensor]): Anchors of each image
+                valid_flag_list (list[Tensor]): Valid flags of each image
+        """
+        num_imgs = len(img_metas)
+
+        # since feature map sizes of all images are the same, we only compute
+        # anchors for one time
+        multi_level_anchors = self.anchor_generator.grid_anchors(
+            featmap_sizes, device)
+        anchor_list = [multi_level_anchors for _ in range(num_imgs)]
+
+        # for each image, we compute valid flags of multi level anchors
+        valid_flag_list = []
+        for img_id, img_meta in enumerate(img_metas):
+            multi_level_flags = self.anchor_generator.valid_flags(
+                featmap_sizes, img_meta['pad_shape'], device)
+            valid_flag_list.append(multi_level_flags)
+
+        return anchor_list, valid_flag_list
+
+    def bbox_decode(self,
+                    bbox_preds,
+                    anchors, stage):
+        """
+        Decode bboxes from deltas
+        :param bbox_preds: [N,5,H,W]
+        :param anchors: [H*W,5]
+        :return: [N,H,W,5]
+        """
+        bboxes_list = []
+        for pred, anchor in zip(bbox_preds, anchors):
+            pred = pred.detach()
+            anchor = anchor.repeat(pred.size()[0], 1, 1).reshape(-1, 5)
+            num_imgs, _, H, W = pred.shape
+
+            # bbox_pred.shape=[5,H,W]
+            bbox_delta = pred.permute(0, 2, 3, 1).reshape(-1, 5)
+            bboxes = self.heads[stage].bbox_coder.decode(anchor, bbox_delta, wh_ratio_clip=1e-6)
+            bboxes = bboxes.reshape(-1, H, W, 5)
+            bboxes_list.append(bboxes)
+            # result_lst.append(torch.stack(bboxes_list, dim=0))
+        return bboxes_list
+
+    def get_pred_anchors(self, outs, stage, prior_anchors=None):
+        if prior_anchors is None:
+            featmap_size = [feat.size()[2:4] for feat in outs[1]]
+            prior_anchors = self.heads[stage].anchor_generator.grid_anchors(
+                featmap_size, device=outs[1][0].device)
+        # anchor_list = [init_anchors_list for _ in range(len(img_metas))]
+        return self.bbox_decode(outs[1], prior_anchors, stage)
+
+    def align_feature(self, x, proposals):
+        align_feats = []
+        if self.align_type == 'AlignConv':
+            for feat, proposal, stride in zip(x, proposals, self.anchor_generator.strides):
+                p2 = proposal.clone()
+                # p2[..., -1] = -p2[..., -1]
+                align_feats.append(self.align_conv(feat, p2, stride))
+        else:
+            for feat in x:
+                align_feats.append(self.align_conv(feat))
+
+        return align_feats
+
+    def _bbox_forward_train(self, stage, x, gt_obboxes, gt_labels, img_metas, gt_bboxes_ignore=None,
+                            prior_anchors=None, with_anchor=False):
+        outs = self.heads[stage](x)
+
+        if prior_anchors is None:
+            loss_inputs = outs + (gt_obboxes, gt_labels, img_metas)
+        else:
+            loss_inputs = outs + (gt_obboxes, gt_labels, prior_anchors, img_metas)
+        losses = self.heads[stage].loss(*loss_inputs, gt_bboxes_ignore=gt_bboxes_ignore)
+
+        result_dict = dict()
+        result_dict.update(losses=losses)
+        if with_anchor:
+            result_dict.update(prior_anchors=self.get_pred_anchors(outs, stage, prior_anchors))
+        return result_dict
+
+    def forward(self, feats):
+        prior_anchors = None
+        for i in range(self.num_stages):
+            with_anchor = True if i != (self.num_stage - 1) else False
+            outs = self.heads[i](feats, prior_anchors)
+            if with_anchor:
+                prior_anchors = self.get_pred_anchors(outs, i, prior_anchors)
+                feats = self.align_feat(feats, prior_anchors)
+        return outs
+
+    def forward_train(self,
+                      x,
+                      img_metas,
+                      gt_obboxes,
+                      gt_labels=None,
+                      gt_bboxes_ignore=None,
+                      proposal_cfg=None,
+                      **kwargs):
+        losses = dict()
+        feat = x
+        prior_anchors = None
+        for i in range(self.num_stages):
+            with_anchor = True if i != (self.num_stage - 1) else False
+            result_dict = self._bbox_forward_train(i, feat, gt_obboxes,
+                                                   gt_labels, img_metas,
+                                                   gt_bboxes_ignore, prior_anchors,
+                                                   with_anchor=with_anchor)
+            # update loss
+            for name, value in result_dict['losses'].items():
+                losses[f's{i}.{name}'] = value
+
+            # align feature
+            if with_anchor:
+                prior_anchors=result_dict['prior_anchors']
+                feat = self.align_feat(feat, prior_anchors)
+
+        return losses
+
+    def get_bboxes(self, *args, **kwargs):
+        return self.heads[-1].get_bboxes(*args, **kwargs)
