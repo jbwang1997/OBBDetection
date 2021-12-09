@@ -8,9 +8,11 @@ from .obb.obb2obb_delta_xywht_coder import OBB2OBBDeltaXYWHTCoder
 from .obb.hbb2obb_delta_xywht_coder import HBB2OBBDeltaXYWHTCoder
 from .obb.gliding_vertex_coders import GVFixCoder, GVRatioCoder
 from .obb.midpoint_offset_coder import MidpointOffsetCoder
+from .obb.delta_xywha_bbox_coder import DeltaXYWHABBoxCoder
 
 __all__ = [
     'BaseBBoxCoder', 'PseudoBBoxCoder', 'DeltaXYWHBBoxCoder',
     'LegacyDeltaXYWHBBoxCoder', 'TBLRBBoxCoder',
-    'OBB2OBBDeltaXYWHTCoder', 'HBB2OBBDeltaXYWHTCoder'
+    'OBB2OBBDeltaXYWHTCoder', 'HBB2OBBDeltaXYWHTCoder',
+    'DeltaXYWHABBoxCoder'
 ]

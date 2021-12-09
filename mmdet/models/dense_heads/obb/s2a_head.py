@@ -1,11 +1,12 @@
+from copy import deepcopy
+
 import torch
 import torch.nn as nn
-from mmcv.cnn import ConvModule, bias_init_with_prob, normal_init
+from mmcv.cnn import ConvModule, normal_init
 from mmcv.ops import DeformConv2dPack, DeformConv2d
 
-from mmdet.core import get_bbox_dim, build_anchor_generator
+from mmdet.core import get_bbox_dim
 from mmdet.models.builder import HEADS, build_head
-from .obb_anchor_head import OBBAnchorHead
 from ..base_dense_head import BaseDenseHead
 
 
@@ -32,6 +33,12 @@ class AlignConv(nn.Module):
     def get_offset(self, anchors, featmap_size, stride):
         dtype, device = anchors.dtype, anchors.device
         feat_h, feat_w = featmap_size
+
+        # Check if stride is tuple
+        if isinstance(stride, tuple):
+            assert stride[0] == stride[1]
+            stride = stride[0]
+
         pad = (self.kernel_size - 1) // 2
         idx = torch.arange(-pad, pad + 1, dtype=dtype, device=device)
         yy, xx = torch.meshgrid(idx, idx)
@@ -89,12 +96,23 @@ class S2AHead(BaseDenseHead):
                  test_cfg=None):
         super(S2AHead, self).__init__()
 
-        self.heads = []
-        for i, (head, cfg) in enumerate(zip(heads, train_cfg)):
-            head.update(train_cfg=cfg)
-            head.update(test_cfg=test_cfg)
+        if isinstance(test_cfg['skip_cls'], list):
+            skip_cls = test_cfg['skip_cls']
+            test_cfg.pop('skip_cls')
+            assert len(skip_cls) == len(heads)
+            test_cfg = [deepcopy(test_cfg) for _ in range(len(heads))]
+            for skip, cfg in zip(skip_cls, test_cfg):
+                cfg['skip_cls'] = skip
+        else:
+            test_cfg = [test_cfg for _ in range(len(heads))]
+
+        self.heads = nn.ModuleList()
+        for i, head in enumerate(heads):
+            if train_cfg is not None:
+                head.update(train_cfg=train_cfg[i])
+
+            head.update(test_cfg=test_cfg[i])
             head_module = build_head(head)
-            # TODO 说明
             if i == 0:
                 self.anchor_generator = head_module.anchor_generator
                 self.num_anchors = head_module.num_anchors
@@ -104,6 +122,10 @@ class S2AHead(BaseDenseHead):
             self.heads.append(head_module)
 
         self.num_stages = len(self.heads)
+        self.num_classes = self.heads[-1].num_classes
+
+        assert self.num_stages >= 2
+
         self.feat_channels = feat_channels
         self.align_type = align_type
         assert align_type in ['Conv', 'DCN', 'AlignConv']
@@ -137,39 +159,10 @@ class S2AHead(BaseDenseHead):
     def loss(self, **kwargs):
         raise Exception
 
-    def get_anchors(self, featmap_sizes, img_metas, device='cuda'):
-        """Get anchors according to feature map sizes.
-
-        Args:
-            featmap_sizes (list[tuple]): Multi-level feature map sizes.
-            img_metas (list[dict]): Image meta info.
-            device (torch.device | str): Device for returned tensors
-
-        Returns:
-            tuple:
-                anchor_list (list[Tensor]): Anchors of each image
-                valid_flag_list (list[Tensor]): Valid flags of each image
-        """
-        num_imgs = len(img_metas)
-
-        # since feature map sizes of all images are the same, we only compute
-        # anchors for one time
-        multi_level_anchors = self.anchor_generator.grid_anchors(
-            featmap_sizes, device)
-        anchor_list = [multi_level_anchors for _ in range(num_imgs)]
-
-        # for each image, we compute valid flags of multi level anchors
-        valid_flag_list = []
-        for img_id, img_meta in enumerate(img_metas):
-            multi_level_flags = self.anchor_generator.valid_flags(
-                featmap_sizes, img_meta['pad_shape'], device)
-            valid_flag_list.append(multi_level_flags)
-
-        return anchor_list, valid_flag_list
-
     def bbox_decode(self,
                     bbox_preds,
-                    anchors, stage):
+                    anchors,
+                    stage):
         """
         Decode bboxes from deltas
         :param bbox_preds: [N,5,H,W]
@@ -215,10 +208,7 @@ class S2AHead(BaseDenseHead):
                             prior_anchors=None, with_anchor=False):
         outs = self.heads[stage](x)
 
-        if prior_anchors is None:
-            loss_inputs = outs + (gt_obboxes, gt_labels, img_metas)
-        else:
-            loss_inputs = outs + (gt_obboxes, gt_labels, prior_anchors, img_metas)
+        loss_inputs = outs + (gt_obboxes, gt_labels, prior_anchors, img_metas)
         losses = self.heads[stage].loss(*loss_inputs, gt_bboxes_ignore=gt_bboxes_ignore)
 
         result_dict = dict()
@@ -228,14 +218,15 @@ class S2AHead(BaseDenseHead):
         return result_dict
 
     def forward(self, feats):
+        global outs
         prior_anchors = None
         for i in range(self.num_stages):
             with_anchor = True if i != (self.num_stages - 1) else False
-            outs = self.heads[i](feats, prior_anchors)
+            outs = self.heads[i](feats)
             if with_anchor:
                 prior_anchors = self.get_pred_anchors(outs, i, prior_anchors)
-                feats = self.align_feat(feats, prior_anchors)
-        return outs
+                feats = self.align_feature(feats, prior_anchors)
+        return *outs, prior_anchors
 
     def forward_train(self,
                       x,
@@ -260,8 +251,8 @@ class S2AHead(BaseDenseHead):
 
             # align feature
             if with_anchor:
-                prior_anchors=result_dict['prior_anchors']
-                feat = self.align_feat(feat, prior_anchors)
+                prior_anchors = result_dict['prior_anchors']
+                feat = self.align_feature(feat, prior_anchors)
 
         return losses
 

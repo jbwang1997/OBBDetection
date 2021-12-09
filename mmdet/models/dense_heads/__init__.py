@@ -24,6 +24,7 @@ from .obb.obb_retina_head import OBBRetinaHead
 from .obb.oriented_rpn_head import OrientedRPNHead
 from .obb.obb_fcos_head import OBBFCOSHead
 from .obb.s2a_head import S2AHead
+from .obb.odm_head import ODMHead
 
 __all__ = [
     'AnchorFreeHead', 'AnchorHead', 'GuidedAnchorHead', 'FeatureAdaption',
