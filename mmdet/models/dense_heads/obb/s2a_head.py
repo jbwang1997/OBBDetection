@@ -96,6 +96,7 @@ class S2AHead(BaseDenseHead):
                  test_cfg=None):
         super(S2AHead, self).__init__()
 
+        # Skip cls branch to speedup inference speed
         if isinstance(test_cfg['skip_cls'], list):
             skip_cls = test_cfg['skip_cls']
             test_cfg.pop('skip_cls')
@@ -104,7 +105,7 @@ class S2AHead(BaseDenseHead):
             for skip, cfg in zip(skip_cls, test_cfg):
                 cfg['skip_cls'] = skip
         else:
-            test_cfg = [test_cfg for _ in range(len(heads))]
+            test_cfg = [test_cfg for _ in heads]
 
         self.heads = nn.ModuleList()
         for i, head in enumerate(heads):
@@ -126,35 +127,48 @@ class S2AHead(BaseDenseHead):
 
         assert self.num_stages >= 2
 
+        if isinstance(align_type, str):
+            self.align_type = [align_type for _ in self.heads]
+        else:
+            assert len(align_type) == len(self.heads)-1
+            self.align_type = align_type
+
         self.feat_channels = feat_channels
-        self.align_type = align_type
-        assert align_type in ['Conv', 'DCN', 'AlignConv']
-        if align_type == 'Conv':
-            self.align_conv = ConvModule(feat_channels,
-                                         feat_channels,
-                                         kernel_size=3,
-                                         stride=1,
-                                         padding=1)
-        elif align_type == 'DCN':
-            self.align_conv = DeformConv2dPack(feat_channels,
-                                               feat_channels,
-                                               kernel_size=3,
-                                               stride=1,
-                                               padding=1,
-                                               deform_groups=1)
-        elif align_type == 'AlignConv':
-            self.align_conv = AlignConv(feat_channels,
-                                        feat_channels,
-                                        kernel_size=3,
-                                        deform_groups=1)
         self.bbox_type = 'obb'
         self.reg_dim = get_bbox_dim(self.bbox_type)
+        self._init_layers()
+
+    def _init_layers(self):
+        """Initialize Align layers of the S2AHead."""
+        self.align_convs = nn.ModuleList()
+        for align_type in self.align_type:
+
+            assert align_type in ['Conv', 'DCN', 'AlignConv']
+            if align_type == 'Conv':
+                self.align_convs.append(ConvModule(self.feat_channels,
+                                                   self.feat_channels,
+                                                   kernel_size=3,
+                                                   stride=1,
+                                                   padding=1))
+            elif align_type == 'DCN':
+                self.align_convs.append(DeformConv2dPack(self.feat_channels,
+                                                         self.feat_channels,
+                                                         kernel_size=3,
+                                                         stride=1,
+                                                         padding=1,
+                                                         deform_groups=1))
+            elif align_type == 'AlignConv':
+                self.align_convs.append(AlignConv(self.feat_channels,
+                                                 self.feat_channels,
+                                                 kernel_size=3,
+                                                 deform_groups=1))
 
     def init_weights(self):
         """Initialize weights of the head."""
         for head in self.heads:
             head.init_weights()
-        self.align_conv.init_weights()
+        for align_conv in self.align_convs:
+            align_conv.init_weights()
 
     def loss(self, **kwargs):
         raise Exception
@@ -163,49 +177,46 @@ class S2AHead(BaseDenseHead):
                     bbox_preds,
                     anchors,
                     stage):
-        """
-        Decode bboxes from deltas
-        :param bbox_preds: [N,5,H,W]
-        :param anchors: [H*W,5]
-        :return: [N,H,W,5]
-        """
+        """Decode bboxes from deltas"""
         bboxes_list = []
         for pred, anchor in zip(bbox_preds, anchors):
             pred = pred.detach()
             anchor = anchor.repeat(pred.size()[0], 1, 1).reshape(-1, 5)
             num_imgs, _, H, W = pred.shape
 
-            # bbox_pred.shape=[5,H,W]
             bbox_delta = pred.permute(0, 2, 3, 1).reshape(-1, 5)
             bboxes = self.heads[stage].bbox_coder.decode(anchor, bbox_delta, wh_ratio_clip=1e-6)
             bboxes = bboxes.reshape(-1, H, W, 5)
             bboxes_list.append(bboxes)
-            # result_lst.append(torch.stack(bboxes_list, dim=0))
         return bboxes_list
 
     def get_pred_anchors(self, outs, stage, prior_anchors=None):
+        """Generate anchors from head's out"""
         if prior_anchors is None:
             featmap_size = [feat.size()[2:4] for feat in outs[1]]
             prior_anchors = self.heads[stage].anchor_generator.grid_anchors(
                 featmap_size, device=outs[1][0].device)
-        # anchor_list = [init_anchors_list for _ in range(len(img_metas))]
         return self.bbox_decode(outs[1], prior_anchors, stage)
 
-    def align_feature(self, x, proposals):
+    def align_feature(self, stage, x, proposals):
+        """Align Convolutional Feature By Proposals"""
+        align_type = self.align_type[stage]
+        align_conv = self.align_convs[stage]
         align_feats = []
-        if self.align_type == 'AlignConv':
+        if align_type == 'AlignConv':
             for feat, proposal, stride in zip(x, proposals, self.anchor_generator.strides):
                 p2 = proposal.clone()
                 # p2[..., -1] = -p2[..., -1]
-                align_feats.append(self.align_conv(feat, p2, stride))
+                align_feats.append(align_conv(feat, p2, stride))
         else:
             for feat in x:
-                align_feats.append(self.align_conv(feat))
+                align_feats.append(align_conv(feat))
 
         return align_feats
 
     def _bbox_forward_train(self, stage, x, gt_obboxes, gt_labels, img_metas, gt_bboxes_ignore=None,
                             prior_anchors=None, with_anchor=False):
+        """Run forward function and calculate loss for box head in training"""
         outs = self.heads[stage](x)
 
         loss_inputs = outs + (gt_obboxes, gt_labels, prior_anchors, img_metas)
@@ -218,14 +229,14 @@ class S2AHead(BaseDenseHead):
         return result_dict
 
     def forward(self, feats):
-        global outs
         prior_anchors = None
+        outs = None
         for i in range(self.num_stages):
             with_anchor = True if i != (self.num_stages - 1) else False
             outs = self.heads[i](feats)
             if with_anchor:
                 prior_anchors = self.get_pred_anchors(outs, i, prior_anchors)
-                feats = self.align_feature(feats, prior_anchors)
+                feats = self.align_feature(i, feats, prior_anchors)
         return *outs, prior_anchors
 
     def forward_train(self,
@@ -252,7 +263,7 @@ class S2AHead(BaseDenseHead):
             # align feature
             if with_anchor:
                 prior_anchors = result_dict['prior_anchors']
-                feat = self.align_feature(feat, prior_anchors)
+                feat = self.align_feature(i, feat, prior_anchors)
 
         return losses
 
