@@ -91,7 +91,7 @@ train_cfg = [
             neg_iou_thr=0.4,
             min_pos_iou=0,
             ignore_iof_thr=-1,
-            iou_calculator=dict(type='OBBOverlaps')),
+            iou_calculator=dict(type='RBboxOverlaps2D')),
         allowed_border=-1,
         pos_weight=-1,
         debug=False),
@@ -102,7 +102,7 @@ train_cfg = [
             neg_iou_thr=0.4,
             min_pos_iou=0,
             ignore_iof_thr=-1,
-            iou_calculator=dict(type='OBBOverlaps')),
+            iou_calculator=dict(type='RBboxOverlaps2D')),
         allowed_border=-1,
         pos_weight=-1,
         debug=False

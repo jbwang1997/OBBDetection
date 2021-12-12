@@ -123,7 +123,8 @@ def bbox2delta(proposals, gt, means=(0., 0., 0., 0., 0.), stds=(1., 1., 1., 1., 
     dw = torch.log(gt_widths / proposals_widths)
     dh = torch.log(gt_heights / proposals_heights)
     da = gt_angle - proposals_angles
-    da = regular_theta(da, start=-np.pi/4) / np.pi
+    # da = regular_theta(da, start=-np.pi/4) / np.pi
+    da = regular_theta(da) / np.pi
 
 
     deltas = torch.stack((dx, dy, dw, dh, da), -1)
@@ -219,7 +220,8 @@ def delta2bbox(rois,
 
 
     ga = np.pi * dangle + roi_angle
-    ga = regular_theta(ga, start=-np.pi/4)
+    # ga = regular_theta(ga, start=-np.pi/4)
+    ga = regular_theta(ga)
 
 
     if clip_border and max_shape is not None:
