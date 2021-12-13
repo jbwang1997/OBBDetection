@@ -19,7 +19,7 @@ The past decade has witnessed significant progress on detecting objects in aeria
 
 | Backbone |   Data  | Lr schd | Ms | Rotate | box AP |                           Baidu Yun                          |                                         Google Drive                                        |
 |:--------:|:-------:|:-------:|:--:|:------:|:------:|:------------------------------------------------------------:|:-------------------------------------------------------------------------------------------:|
-|  R50-FPN | DOTA1.0 |    1x   |  - |    -   |    -   |                                                              |                                              -                                              |
+|  R50-FPN | DOTA1.0 |    1x   |  - |    -   |  74.0  | [key: gemn](https://pan.baidu.com/s/11P3BZEfBsiJUCEXT4SNeYg) |                                              -                                              |
 |  R50-FPN | DOTA1.0 |    2x   |  - |    -   |    -   |                                                              |                                              -                                              |
 | R101-FPN | DOTA1.0 |    1x   |  - |    -   |    -   |                                                              |                                              -                                              |
 | R101-FPN | DOTA1.0 |    2x   |  - |    -   |    -   |                                                              |                                              -                                              |
