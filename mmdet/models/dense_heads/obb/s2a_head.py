@@ -57,7 +57,7 @@ class AlignConv(nn.Module):
         # get sampling locations of anchors
         x_ctr, y_ctr, w, h, a = torch.unbind(anchors, dim=1)
         x_ctr, y_ctr, w, h = x_ctr / stride, y_ctr / stride, w / stride, h / stride
-        cos, sin = torch.cos(a), torch.sin(a)
+        cos, sin = torch.cos(-a), torch.sin(-a)
         dw, dh = w / self.kernel_size, h / self.kernel_size
         x, y = dw[:, None] * xx, dh[:, None] * yy
         xr = cos[:, None] * x - sin[:, None] * y

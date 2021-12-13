@@ -44,7 +44,7 @@ model = dict(
                     ratios=[1.0],
                     strides=[8, 16, 32, 64, 128]),
                 bbox_coder=dict(
-                    type='DeltaXYWHABBoxCoder',
+                    type='OBB2OBBDeltaXYWHTCoder',
                     target_means=(0., 0., 0., 0., 0.),
                     target_stds=(1., 1., 1., 1., 1.)),
                 reg_decoded_bbox=False,
@@ -65,7 +65,7 @@ model = dict(
                 stacked_convs=2,
                 with_orconv=True,
                 bbox_coder=dict(
-                    type='DeltaXYWHABBoxCoder',
+                    type='OBB2OBBDeltaXYWHTCoder',
                     target_means=(0., 0., 0., 0., 0.),
                     target_stds=(1., 1., 1., 1., 1.)),
                 reg_decoded_bbox=False,
@@ -91,7 +91,7 @@ train_cfg = [
             neg_iou_thr=0.4,
             min_pos_iou=0,
             ignore_iof_thr=-1,
-            iou_calculator=dict(type='RBboxOverlaps2D')),
+            iou_calculator=dict(type='OBBOverlaps')),
         allowed_border=-1,
         pos_weight=-1,
         debug=False),
@@ -102,7 +102,7 @@ train_cfg = [
             neg_iou_thr=0.4,
             min_pos_iou=0,
             ignore_iof_thr=-1,
-            iou_calculator=dict(type='RBboxOverlaps2D')),
+            iou_calculator=dict(type='OBBOverlaps')),
         allowed_border=-1,
         pos_weight=-1,
         debug=False
@@ -142,3 +142,11 @@ test_cfg = dict(
 #         pipeline=train_pipeline
 #     ),
 # )
+
+# Final Result
+# mAP: 0.7404564819386658
+# ap of each class: plane:0.8878974204378595, baseball-diamond:0.8071806291320748, bridge:0.5260062844100715,
+# ground-track-field:0.733263720865298, small-vehicle:0.7863866711912353, large-vehicle:0.7897973201340522,
+# ship:0.8766842782424621, tennis-court:0.9090225563909776, basketball-court:0.8498791032236941,
+# storage-tank:0.8440616190813502, soccer-ball-field:0.6071881997157468, roundabout:0.661790586216465,
+# harbor:0.6948527168745157, swimming-pool:0.6631525938702733, helicopter:0.4696835292939079
