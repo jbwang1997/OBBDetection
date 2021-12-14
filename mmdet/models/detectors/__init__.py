@@ -29,6 +29,7 @@ from .obb.gliding_vertex import GlidingVertex
 from .obb.obb_rpn import OBBRPN
 from .obb.oriented_rcnn import OrientedRCNN
 from .obb.fcos_obb import FCOSOBB
+from .obb.s2anet import S2ANet
 
 __all__ = [
     'ATSS', 'BaseDetector', 'SingleStageDetector', 'TwoStageDetector', 'RPN',

@@ -1,18 +1,17 @@
-import BboxToolkit as bt
-
 import os
-import cv2
+import os.path as osp
 import time
+from collections import defaultdict
+from functools import partial
+
+import BboxToolkit as bt
+import cv2
 import mmcv
 import numpy as np
-import os.path as osp
-# from multiprocessing import Pool
 
-from functools import partial
 from mmdet.core import eval_arb_map, eval_arb_recalls
-from mmdet.ops.nms_rotated import obb_nms, poly_nms, BT_nms
 from mmdet.ops.nms import nms
-from collections import defaultdict
+from mmdet.ops.nms_rotated import obb_nms, BT_nms
 from ..builder import DATASETS
 from ..custom import CustomDataset
 
@@ -54,7 +53,7 @@ class DOTADataset(CustomDataset):
         if not self.test_mode:
             data_infos = []
             for content in contents:
-                if len(content['ann']['bboxes']) != 0:
+                if (not self.filter_empty_gt) or len(content['ann']['bboxes']) != 0:
                     data_infos.append(content)
         else:
             data_infos = contents
@@ -99,7 +98,7 @@ class DOTADataset(CustomDataset):
         if ign_scale_ranges is not None:
             assert len(ign_scale_ranges) == (len(self.split_info['rates']) *
                                              len(self.split_info['sizes']))
-            split_sizes=[]
+            split_sizes = []
             for rate in self.split_info['rates']:
                 split_sizes += [int(size / rate) for size in self.split_info['sizes']]
 
@@ -149,7 +148,7 @@ class DOTADataset(CustomDataset):
             bt.save_dota_submission(save_dir, id_list, dets_list, task, self.CLASSES)
 
         stop_time = time.time()
-        print('Used time: %.1f s'%(stop_time - start_time))
+        print('Used time: %.1f s' % (stop_time - start_time))
         return merged_results
 
     def evaluate(self,
@@ -164,7 +163,7 @@ class DOTADataset(CustomDataset):
                  use_07_metric=True,
                  scale_ranges=None,
                  eval_iou_thr=[0.5],
-                 proposal_nums=(2000, ),
+                 proposal_nums=(2000,),
                  nproc=10):
         nproc = min(nproc, os.cpu_count())
         if not isinstance(metric, str):
@@ -194,7 +193,7 @@ class DOTADataset(CustomDataset):
                 gt_bboxes = ann['bboxes']
                 gt_labels = ann['labels']
                 diffs = ann.get(
-                    'diffs', np.zeros((gt_bboxes.shape[0], ), dtype=np.int))
+                    'diffs', np.zeros((gt_bboxes.shape[0],), dtype=np.int))
 
                 if task == 'Task2':
                     gt_bboxes = bt.bbox2type(gt_bboxes, 'hbb')
@@ -229,7 +228,7 @@ class DOTADataset(CustomDataset):
                 bboxes = info['ann']['bboxes']
                 if ign_diff:
                     diffs = info['ann'].get(
-                        'diffs', np.zeros((bboxes.shape[0], ), dtype=np.int))
+                        'diffs', np.zeros((bboxes.shape[0],), dtype=np.int))
                     bboxes = bboxes[diffs == 0]
                 gt_bboxes.append(bboxes)
             if isinstance(eval_iou_thr, float):
@@ -284,7 +283,7 @@ def _list_mask_2_obb(dets, segments):
                 new_bboxes.append(bt.bbox2type(max_contour, 'obb'))
 
             new_bboxes = np.zeros((0, 5)) if not new_bboxes else \
-                    np.concatenate(new_bboxes, axis=0)
+                np.concatenate(new_bboxes, axis=0)
             new_cls_dets.append(
                 np.concatenate([new_bboxes, scores[:, None]], axis=1))
         new_dets.append(new_cls_dets)
