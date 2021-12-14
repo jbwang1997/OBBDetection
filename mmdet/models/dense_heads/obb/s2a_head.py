@@ -128,9 +128,9 @@ class S2AHead(BaseDenseHead):
         assert self.num_stages >= 2
 
         if isinstance(align_type, str):
-            self.align_type = [align_type for _ in self.heads]
+            self.align_type = [align_type for _ in range(len(self.heads) - 1)]
         else:
-            assert len(align_type) == len(self.heads)-1
+            assert len(align_type) == len(self.heads) - 1
             self.align_type = align_type
 
         self.feat_channels = feat_channels
@@ -159,9 +159,9 @@ class S2AHead(BaseDenseHead):
                                                          deform_groups=1))
             elif align_type == 'AlignConv':
                 self.align_convs.append(AlignConv(self.feat_channels,
-                                                 self.feat_channels,
-                                                 kernel_size=3,
-                                                 deform_groups=1))
+                                                  self.feat_channels,
+                                                  kernel_size=3,
+                                                  deform_groups=1))
 
     def init_weights(self):
         """Initialize weights of the head."""
@@ -237,7 +237,7 @@ class S2AHead(BaseDenseHead):
             if with_anchor:
                 prior_anchors = self.get_pred_anchors(outs, i, prior_anchors)
                 feats = self.align_feature(i, feats, prior_anchors)
-        return *outs, prior_anchors
+        return outs + (prior_anchors,)
 
     def forward_train(self,
                       x,
