@@ -6,7 +6,7 @@ from mmcv.parallel import MMDataParallel, MMDistributedDataParallel
 from mmcv.runner import (DistSamplerSeedHook, EpochBasedRunner, OptimizerHook,
                          build_optimizer)
 
-from mmdet.core import DistEvalHook, EvalHook, Fp16OptimizerHook
+from mmdet.core import DistEvalHook, EvalHook, Fp16OptimizerHook, RandomFPHook
 from mmdet.datasets import build_dataloader, build_dataset
 from mmdet.utils import get_root_logger
 
@@ -121,6 +121,10 @@ def train_detector(model,
                 shuffle=False)
             eval_hook = DistEvalHook if distributed else EvalHook
             runner.register_hook(eval_hook(val_dataloader, **eval_cfg))
+
+    # register random fp hook
+    if cfg.get('random_fp', False):
+        runner.register_hook(RandomFPHook())
 
     if cfg.resume_from:
         runner.resume(cfg.resume_from)

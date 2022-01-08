@@ -3,6 +3,7 @@ import os.path as osp
 import time
 from collections import defaultdict
 from functools import partial
+from random import sample
 
 import BboxToolkit as bt
 import cv2
@@ -21,11 +22,12 @@ class DOTADataset(CustomDataset):
 
     def __init__(self,
                  task,
-                 *args,
+                 fp_ratio=0,
                  **kwargs):
         assert task in ['Task1', 'Task2']
         self.task = task
-        super(DOTADataset, self).__init__(*args, **kwargs)
+        self.fp_ratio = fp_ratio
+        super(DOTADataset, self).__init__(**kwargs)
 
     @classmethod
     def get_classes(cls, classes=None):
@@ -50,14 +52,28 @@ class DOTADataset(CustomDataset):
         if self.CLASSES is None:
             self.CLASSES = cls
 
-        if not self.test_mode:
-            data_infos = []
-            for content in contents:
-                if (not self.filter_empty_gt) or len(content['ann']['bboxes']) != 0:
-                    data_infos.append(content)
-        else:
-            data_infos = contents
+        if self.test_mode:
+            return contents
+
+        self.pp_infos = []
+        self.fp_infos = []
+        for content in contents:
+            if content['ann']['bboxes'].size != 0:
+                self.pp_infos.append(content)
+            else:
+                self.fp_infos.append(content)
+        data_infos = self.add_random_fp()
         return data_infos
+
+    def add_random_fp(self):
+        if self.fp_ratio == 0:
+            return self.pp_infos
+        elif self.fp_ratio == 'all':
+            return self.pp_infos + self.fp_infos
+        else:
+            num = min(self.fp_ratio*len(self.pp_infos), len(self.fp_infos))
+            fp_infos = sample(self.fp_infos, k=int(num))
+            return self.pp_infos + fp_infos
 
     def get_subset_by_classes(self):
         bt.change_cls_order(self.data_infos, self.ori_CLASSES, self.CLASSES)
