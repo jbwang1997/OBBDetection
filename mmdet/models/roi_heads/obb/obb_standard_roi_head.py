@@ -104,7 +104,7 @@ class OBBStandardRoIHead(OBBBaseRoIHead, OBBoxTestMixin):
 
                 if start_bbox_type != end_bbox_type:
                     if gt_obboxes[i].numel() == 0:
-                        sampling_result.pos_gt_bboxes = gt_obboxes[i].new_zeors(
+                        sampling_result.pos_gt_bboxes = gt_obboxes[i].new_zeros(
                             (0, gt_obboxes[0].size(-1)))
                     else:
                         sampling_result.pos_gt_bboxes = \
