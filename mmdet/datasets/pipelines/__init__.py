@@ -10,7 +10,6 @@ from .transforms import (Albu, Expand, MinIoURandomCrop, Normalize, Pad,
                          PhotoMetricDistortion, RandomCenterCropPad,
                          RandomCrop, RandomFlip, Resize, SegRescale)
 
-from .obb.base import mask2obb, mask2poly, poly2mask
 from .obb.base import (LoadOBBAnnotations, Mask2OBB, OBBDefaultFormatBundle,
                        OBBRandomFlip, RandomOBBRotate, MultiScaleFlipRotateAug,
                        FliterEmpty)

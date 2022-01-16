@@ -5,7 +5,7 @@ img_norm_cfg = dict(
 train_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(type='LoadOBBAnnotations', with_bbox=True,
-         with_label=True, with_poly_as_mask=True),
+         with_label=True, obb_as_mask=True),
     dict(type='Resize', img_scale=(800, 800), keep_ratio=True),
     dict(type='OBBRandomFlip', h_flip_ratio=0.5, v_flip_ratio=0.5),
     dict(type='Normalize', **img_norm_cfg),

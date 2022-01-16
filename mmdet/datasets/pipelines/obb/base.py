@@ -11,83 +11,11 @@ from mmcv.parallel import DataContainer as DC
 from mmdet.core import PolygonMasks, BitmapMasks
 from mmdet.datasets.builder import PIPELINES
 
+from .misc import bbox2mask, switch_mask_type, mask2bbox, rotate_polygonmask
 from ..loading import LoadAnnotations
 from ..formating import DefaultFormatBundle, Collect, to_tensor
 from ..transforms import RandomFlip
 from ..compose import Compose
-
-
-def mask2obb(gt_masks):
-    obboxes = []
-    if isinstance(gt_masks, PolygonMasks):
-        for mask in gt_masks.masks:
-            all_mask_points = np.concatenate(mask, axis=0)[None, ...]
-            obboxes.append(bt.bbox2type(all_mask_points, 'obb'))
-    elif isinstance(gt_masks, BitmapMasks):
-        for mask in gt_masks.masks:
-            try:
-                contours, _ = cv2.findContours(
-                    mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
-            except ValueError:
-                _, contours, _ = cv2.findContours(
-                    mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
-
-            max_contour = max(contours, key=len).reshape(1, -1)
-            obboxes.append(bt.bbox2type(max_contour, 'obb'))
-    else:
-        raise NotImplementedError
-
-    if not obboxes:
-        return np.zeros((0, 5), dtype=np.float32)
-    else:
-        obboxes = np.concatenate(obboxes, axis=0)
-        return obboxes
-
-
-def mask2poly(gt_masks):
-    polys = []
-    if isinstance(gt_masks, PolygonMasks):
-        for mask in gt_masks.masks:
-            if len(mask) == 1 and mask[0].size == 8:
-                polys.append(mask)
-            else:
-                all_mask_points = np.concatenate(mask, axis=0)[None, ...]
-                obbox = bt.bbox2type(all_mask_points, 'obb')
-                polys.append(bt.bbox2type(obbox, 'poly'))
-    elif isinstance(gt_masks, BitmapMasks):
-        for mask in gt_masks.masks:
-            try:
-                contours, _ = cv2.findContours(
-                    mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
-            except ValueError:
-                _, contours, _ = cv2.findContours(
-                    mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
-
-            max_contour = max(contours, key=len).reshape(1, -1)
-            obbox = bt.bbox2type(max_contour, 'obb')
-            polys.append(bt.bbox2type(obbox, 'poly'))
-    else:
-        raise NotImplementedError
-
-    if not polys:
-        return np.zeros((0, 8), dtype=np.float32)
-    else:
-        polys = np.concatenate(polys, axis=0)
-        return polys
-
-
-def poly2mask(polys, w, h, mask_type='polygon'):
-    assert mask_type in ['polygon', 'bitmap']
-    if mask_type == 'bitmap':
-        masks = []
-        for poly in polys:
-            rles = maskUtils.frPyObjects([poly.tolist()], h, w)
-            masks.append(maskUtils.decode(rles[0]))
-        gt_masks = BitmapMasks(masks, h, w)
-
-    else:
-        gt_masks = PolygonMasks([[poly] for poly in polys], h, w)
-    return gt_masks
 
 
 @PIPELINES.register_module()
@@ -110,18 +38,19 @@ class LoadOBBAnnotations(LoadAnnotations):
     def __init__(self,
                  with_bbox=True,
                  with_label=True,
+                 with_mask=False,
                  with_seg=False,
-                 with_poly_as_mask=True,
+                 obb_as_mask=True,
                  poly2mask=False,
                  file_client_args=dict(backend='disk')):
-        self.with_bbox = with_bbox
-        self.with_poly_as_mask = with_poly_as_mask
-        self.with_label = with_label
-        self.with_mask = False
-        self.with_seg = with_seg
-        self.poly2mask = poly2mask
-        self.file_client_args = file_client_args.copy()
-        self.file_client = None
+        super(LoadOBBAnnotations, self).__init__(
+            with_bbox=with_bbox,
+            with_label=with_label,
+            with_mask=with_mask,
+            with_seg=with_seg,
+            poly2mask=poly2mask,
+            file_client_args=file_client_args)
+        self.obb_as_mask = False if with_mask else obb_as_mask
 
     def _load_bboxes(self, results):
         ann_info = results['ann_info']
@@ -129,14 +58,10 @@ class LoadOBBAnnotations(LoadAnnotations):
         results['gt_bboxes'] = bt.bbox2type(gt_bboxes, 'hbb')
         results['bbox_fields'].append('gt_bboxes')
 
-        if self.with_poly_as_mask:
+        if self.obb_as_mask:
             h, w = results['img_info']['height'], results['img_info']['width']
-            polys = bt.bbox2type(gt_bboxes.copy(), 'poly')
-            mask_type = 'bitmap' if self.poly2mask else 'polygon'
-            gt_masks = poly2mask(polys, w, h, mask_type)
-            results['gt_masks'] = gt_masks
+            results['gt_masks'] = bbox2mask(gt_bboxes, w, h, 'polygon')
             results['mask_fields'].append('gt_masks')
-
         return results
 
 
@@ -225,12 +150,29 @@ class Mask2OBB(object):
         self.obb_type = obb_type
 
     def __call__(self, results):
-        trans_func = mask2obb if self.obb_type == 'obb' else mask2poly
         for mask_k, obb_k in zip(self.mask_keys, self.obb_keys):
             if mask_k in results:
                 mask = results[mask_k]
-                obb = trans_func(mask)
-                results[obb_k] = obb
+                obbs = mask2bbox(mask, self.obb_type)
+                results[obb_k] = obbs
+                return results
+
+
+@PIPELINES.register_module()
+class MaskType(object):
+
+    def __init__(self,
+                 mask_keys=None,
+                 mask_type='bitmap'):
+        assert mask_type in ['bitmap', 'polygon']
+        self.mask_keys = mask_keys
+        self.mask_type = mask_type
+
+    def __call__(self, results):
+        mask_keys = results['mask_fields'] if self.mask_keys is None \
+                else self.mask_keys
+        for k in mask_keys:
+            results[k] = switch_mask_type(results[k], self.mask_type)
         return results
 
 
@@ -352,24 +294,27 @@ class RandomOBBRotate(object):
             results['img_shape'] = img.shape
 
         if 'gt_masks' in results:
-            polys = mask2poly(results['gt_masks'])
-            warped_polys = bt.warp(polys, matrix)
+            polygons = switch_mask_type(results['gt_masks'], 'polygon')
+            warped_polygons = rotate_polygonmask(polygons, matrix, w, h)
+
             if self.keep_shape:
-                iofs = bt.bbox_overlaps(warped_polys, img_bound, mode='iof')
+                obbs = mask2bbox(warped_polygons, 'obb')
+                iofs = bt.bbox_overlaps(obbs, img_bound, mode='iof')
                 if_inwindow = iofs[:, 0] > self.keep_iof_thr
-                # if ~if_inwindow.any():
-                    # return True
-                warped_polys = warped_polys[if_inwindow]
+                index = np.nonzero(if_inwindow)[0]
+                warped_polygons = warped_polygons[index]
 
             if isinstance(results['gt_masks'], BitmapMasks):
-                results['gt_masks'] = poly2mask(warped_polys, w, h, 'bitmap')
+                results['gt_masks'] = switch_mask_type(
+                    warped_polygons, 'bitmap')
             elif isinstance(results['gt_masks'], PolygonMasks):
-                results['gt_masks'] = poly2mask(warped_polys, w, h, 'polygon')
+                results['gt_masks'] = switch_mask_type(
+                    warped_polygons, 'polygon')
             else:
                 raise NotImplementedError
 
             if 'gt_bboxes' in results:
-                results['gt_bboxes'] = bt.bbox2type(warped_polys, 'hbb')
+                results['gt_bboxes'] = mask2bbox(warped_polygons, 'hbb')
 
         elif 'gt_bboxes' in results:
             warped_bboxes = bt.warp(results['gt_bboxes'], matrix, keep_type=True)
@@ -418,15 +363,18 @@ class RandomOBBRotate(object):
         for k in results.get('mask_fields', []):
             if k == 'gt_masks':
                 continue
-            polys = mask2poly(results[k])
-            warped_polys = bt.warp(polys, matrix)
+            polys = switch_mask_type(results[k], 'polygon')
+            warped_polys = rotate_polygonmask(polys, matrix, w, h)
             if self.keep_shape:
-                iofs = bt.bbox_overlaps(warped_polys, img_bound, mode='iof')
-                warped_polys = warped_polys[iofs[:, 0] > self.keep_iof_thr]
+                obbs = mask2bbox(warped_polys, 'obb')
+                iofs = bt.bbox_overlaps(obbs, img_bound, mode='iof')
+                index = np.nonzero(iofs[:, 0] > self.keep_iof_thr)[0]
+                warped_polys = warped_polys[index]
+
             if isinstance(results[k], BitmapMasks):
-                results[k] = poly2mask(warped_polys, w, h, 'bitmap')
+                results[k] = switch_mask_type(warped_polys, 'bitmap')
             elif isinstance(results[k], PolygonMasks):
-                results[k] = poly2mask(warped_polys, w, h, 'polygon')
+                results[k] = switch_mask_type(warped_polys, 'polygon')
             else:
                 raise NotImplementedError
 

@@ -4,7 +4,7 @@ import cv2
 
 from mmdet.core import PolygonMasks, BitmapMasks
 from mmdet.datasets.builder import PIPELINES
-from .base import mask2poly
+from .misc import mask2bbox
 
 
 @PIPELINES.register_module()
@@ -72,7 +72,7 @@ class DOTASpecialIgnore(object):
         if self.ignore_real_scales:
             assert len(self.ignore_real_scales) == (len(results['split_sizes']) *
                                                     len(results['split_rates']))
-            polys = mask2poly(results['gt_masks'])
+            polys = mask2bbox(results['gt_masks'], 'poly')
             if 'scale_factor' in results:
                 scale_factor = np.tile(results['scale_factor'], 2)
                 polys = polys / scale_factor

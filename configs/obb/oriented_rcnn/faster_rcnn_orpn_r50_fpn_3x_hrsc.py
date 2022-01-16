@@ -4,6 +4,8 @@ _base_ = [
     '../../_base_/default_runtime.py'
 ]
 
+random_fp=True
+
 
 model = dict(
     type='OrientedRCNN',

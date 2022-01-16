@@ -1,13 +1,13 @@
 # Patches with no object are added
 
 dataset_type = 'DOTADataset'
-data_root = 'data/split_ss_dota1_0/'
+data_root = '/data3/wjb/dataset/split_ss_dota1_0/'
 img_norm_cfg = dict(
     mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375], to_rgb=True)
 train_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(type='LoadOBBAnnotations', with_bbox=True,
-         with_label=True, with_poly_as_mask=True),
+         with_label=True, obb_as_mask=True),
     dict(type='LoadDOTASpecialInfo'),
     dict(type='Resize', img_scale=(1024, 1024), keep_ratio=True),
     dict(type='OBBRandomFlip', h_flip_ratio=0.5, v_flip_ratio=0.5),

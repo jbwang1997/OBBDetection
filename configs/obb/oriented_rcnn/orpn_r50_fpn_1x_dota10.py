@@ -81,7 +81,7 @@ img_norm_cfg = dict(
 train_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(type='LoadOBBAnnotations', with_bbox=True,
-         with_label=False, with_poly_as_mask=True),
+         with_label=False, obb_as_mask=True),
     dict(type='LoadDOTASpecialInfo'),
     dict(type='Resize', img_scale=(1024, 1024), keep_ratio=True),
     dict(type='OBBRandomFlip', h_flip_ratio=0.5, v_flip_ratio=0.5),
