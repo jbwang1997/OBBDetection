@@ -1,7 +1,7 @@
 # Patches with no object are added
 
 dataset_type = 'DOTADataset'
-data_root = '/data3/wjb/dataset/split_ss_dota1_0/'
+data_root = 'data/split_ss_dota1_0/'
 img_norm_cfg = dict(
     mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375], to_rgb=True)
 train_pipeline = [
