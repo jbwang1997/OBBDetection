@@ -9,3 +9,7 @@ class ISAIDDataset(CocoDataset):
                'basketball_court', 'Ground_Track_Field', 'Bridge',
                'Large_Vehicle', 'Small_Vehicle', 'Helicopter', 'Swimming_pool',
                'Roundabout', 'Soccer_ball_field', 'plane', 'Harbor')
+
+    def pre_pipeline(self, results):
+        results['cls'] = self.CLASSES
+        super().pre_pipeline(results)

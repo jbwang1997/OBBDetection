@@ -265,7 +265,7 @@ class LoadAnnotations(object):
             list[numpy.ndarray]: Processed polygons.
         """
 
-        polygons = [np.array(p) for p in polygons]
+        polygons = [np.array(p, dtype=np.float32) for p in polygons]
         valid_polygons = []
         for polygon in polygons:
             if len(polygon) % 2 == 0 and len(polygon) >= 6:
