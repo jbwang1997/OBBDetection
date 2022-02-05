@@ -6,6 +6,7 @@ import pycocotools.mask as maskUtils
 import torch
 
 from mmdet.ops.roi_align import roi_align
+from mmdet.ops.roi_align_rotated import roi_align_rotated
 
 
 class BaseInstanceMasks(metaclass=ABCMeta):
@@ -279,8 +280,12 @@ class BitmapMasks(BaseInstanceMasks):
         if num_bbox > 0:
             gt_masks_th = torch.from_numpy(self.masks).to(device).index_select(
                 0, inds).to(dtype=rois.dtype)
-            targets = roi_align(gt_masks_th[:, None, :, :], rois, out_shape,
-                                1.0, 0, True).squeeze(1)
+            if rois.size(1) == 5:
+                targets = roi_align(gt_masks_th[:, None, :, :], rois, out_shape,
+                                    1.0, 0, True).squeeze(1)
+            elif rois.size(1) == 6:
+                targets = roi_align_rotated(gt_masks_th[:, None, :, :], rois,
+                                            out_shape, 1.0, 0, True).squeeze(1)
             resized_masks = (targets >= 0.5).cpu().numpy()
         else:
             resized_masks = []
@@ -473,6 +478,9 @@ class PolygonMasks(BaseInstanceMasks):
         out_h, out_w = out_shape
         if len(self.masks) == 0:
             return PolygonMasks([], out_h, out_w)
+
+        if bboxes.shape[1] == 6:
+            raise NotImplementedError
 
         resized_masks = []
         for i in range(len(bboxes)):

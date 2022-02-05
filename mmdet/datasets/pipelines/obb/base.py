@@ -66,6 +66,32 @@ class LoadOBBAnnotations(LoadAnnotations):
 
 
 @PIPELINES.register_module()
+class TopNAreaObject:
+
+    def __init__(self, n=500):
+        self.n = 500
+
+    def __call__(self, results):
+        gt_bboxes = results['gt_bboxes']
+        if len(gt_bboxes) <= self.n:
+            return results
+
+        if 'gt_masks' in results:
+            areas = results['gt_masks'].areas
+        else:
+            areas = bt.bbox_areas(gt_bboxes)
+
+        index = np.argsort(areas)[:self.n]
+        results['gt_bboxes'] = gt_bboxes[index]
+        if 'gt_labels' in results:
+            results['gt_labels'] = results['gt_labels'][index]
+        if 'gt_masks' in results:
+            results['gt_masks'] = results['gt_masks'][index]
+
+        return results
+
+
+@PIPELINES.register_module()
 class OBBRandomFlip(RandomFlip):
 
     def __init__(self, h_flip_ratio=None, v_flip_ratio=None):
