@@ -15,7 +15,7 @@ You can get a pretrained checkpoint from every models' [README.md](./../configs/
 
 example
 ```shell
-python demo/huge_image_demo.py demo/dota_demo.png configs/obb/oriented_rcnn/faster_rcnn_orpn_r50_fpn_1x_dota10.py \
+python demo/huge_image_demo.py demo/dota_demo.jpg configs/obb/oriented_rcnn/faster_rcnn_orpn_r50_fpn_1x_dota10.py \
 	 ckpt/faster_rcnn_orpn_r50_fpn_1x_dota10_epoch12.pth BboxToolkit/tools/split_configs/dota1_0/ss_test.json
 ```
 
