@@ -5,6 +5,7 @@ from .grid_head import GridHead
 from .htc_mask_head import HTCMaskHead
 from .mask_point_head import MaskPointHead
 from .maskiou_head import MaskIoUHead
+from .obb.obb_fcn_mask_head import OBBFCNMaskHead
 
 __all__ = [
     'FCNMaskHead', 'HTCMaskHead', 'FusedSemanticHead', 'GridHead',

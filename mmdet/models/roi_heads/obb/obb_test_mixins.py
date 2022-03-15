@@ -115,3 +115,83 @@ class OBBoxTestMixin(object):
                                                     rcnn_test_cfg.max_per_img,
                                                     bbox_type=self.bbox_head.end_bbox_type)
         return det_bboxes, det_labels
+
+
+class OBBMaskTestMixin(object):
+
+    if sys.version_info >= (3, 7):
+
+        async def async_test_mask(self,
+                                  x,
+                                  img_metas,
+                                  det_bboxes,
+                                  det_labels,
+                                  rescale=False,
+                                  mask_test_cfg=None):
+            """Asynchronized test for mask head without augmentation."""
+            # image shape of the first image in the batch (only one)
+            ori_shape = img_metas[0]['ori_shape']
+            scale_factor = img_metas[0]['scale_factor']
+            if det_bboxes.shape[0] == 0:
+                segm_result = [[] for _ in range(self.mask_head.num_classes)]
+            else:
+                _bboxes = (
+                    det_bboxes[:, :4] *
+                    scale_factor if rescale else det_bboxes)
+                mask_rois = arb2roi([_bboxes], bbox_type=self.mask_head.bbox_type)
+                mask_feats = self.mask_roi_extractor(
+                    x[:len(self.mask_roi_extractor.featmap_strides)],
+                    mask_rois)
+
+                if self.with_shared_head:
+                    mask_feats = self.shared_head(mask_feats)
+                if mask_test_cfg and mask_test_cfg.get('async_sleep_interval'):
+                    sleep_interval = mask_test_cfg['async_sleep_interval']
+                else:
+                    sleep_interval = 0.035
+                async with completed(
+                        __name__,
+                        'mask_head_forward',
+                        sleep_interval=sleep_interval):
+                    mask_pred = self.mask_head(mask_feats)
+                segm_result = self.mask_head.get_seg_masks(
+                    mask_pred, _bboxes, det_labels, self.test_cfg, ori_shape,
+                    scale_factor, rescale)
+            return segm_result
+
+    def simple_test_mask(self,
+                         x,
+                         img_metas,
+                         det_bboxes,
+                         det_labels,
+                         rescale=False):
+        """Simple test for mask head without augmentation."""
+        # image shape of the first image in the batch (only one)
+        ori_shape = img_metas[0]['ori_shape']
+        scale_factor = img_metas[0]['scale_factor']
+        if det_bboxes.shape[0] == 0:
+            segm_result = [[] for _ in range(self.mask_head.num_classes)]
+        else:
+            # if det_bboxes is rescaled to the original image size, we need to
+            # rescale it back to the testing scale to obtain RoIs.
+            if rescale and not isinstance(scale_factor, float):
+                scale_factor = torch.from_numpy(scale_factor).to(
+                    det_bboxes.device)
+            if self.mask_head.bbox_type == 'hbb':
+                _bboxes = (
+                    det_bboxes[:, :4] * scale_factor if rescale else det_bboxes)
+            else:
+                _bboxes = det_bboxes[:, :5]
+                if rescale:
+                    _bboxes[:, :4] *= scale_factor
+
+            mask_rois = arb2roi([_bboxes], bbox_type=self.mask_head.bbox_type)
+            mask_results = self._mask_forward(x, mask_rois)
+            segm_result = self.mask_head.get_seg_masks(
+                mask_results['mask_pred'], _bboxes, det_labels, self.test_cfg,
+                ori_shape, scale_factor, rescale)
+        return segm_result
+
+    def aug_test_mask(self, feats, img_metas, det_bboxes, det_labels):
+        """Test for mask head with test time augmentation."""
+        raise NotImplementedError

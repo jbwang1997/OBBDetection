@@ -33,6 +33,23 @@ class FliterEmpty:
 
 
 @PIPELINES.register_module()
+class FliterOBB:
+
+    def __init__(self, min_size):
+        self.min_size = min_size
+
+    def __call__(self, results):
+        assert 'gt_obboxes' in results
+        index = results['gt_obboxes'][:, 2:4].min(axis=1) > self.min_size
+        for key in ['gt_obboxes'] + results['bbox_fields']:
+            results[key] = results[key][index]
+        for key in results['mask_fields']:
+            results[key] = results[key][index]
+        results['gt_labels'] = results['gt_labels'][index]
+        return results
+
+
+@PIPELINES.register_module()
 class LoadOBBAnnotations(LoadAnnotations):
 
     def __init__(self,
@@ -41,6 +58,7 @@ class LoadOBBAnnotations(LoadAnnotations):
                  with_mask=False,
                  with_seg=False,
                  obb_as_mask=True,
+                 bbox_mtype='polygon',
                  poly2mask=False,
                  file_client_args=dict(backend='disk')):
         super(LoadOBBAnnotations, self).__init__(
@@ -51,6 +69,8 @@ class LoadOBBAnnotations(LoadAnnotations):
             poly2mask=poly2mask,
             file_client_args=file_client_args)
         self.obb_as_mask = False if with_mask else obb_as_mask
+        assert bbox_mtype in ['polygon', 'bitmap']
+        self.bbox_mtype = bbox_mtype
 
     def _load_bboxes(self, results):
         ann_info = results['ann_info']
@@ -59,8 +79,11 @@ class LoadOBBAnnotations(LoadAnnotations):
         results['bbox_fields'].append('gt_bboxes')
 
         if self.obb_as_mask:
+            MaskClass = PolygonMasks if self.bbox_mtype == 'polygon' \
+                    else BitmapMasks
             h, w = results['img_info']['height'], results['img_info']['width']
-            results['gt_masks'] = bbox2mask(gt_bboxes, w, h, 'polygon')
+            results['gt_masks'] = bbox2mask(gt_bboxes, w, h, self.bbox_mtype)
+            results['gt_masks_ignore'] = MaskClass([], h, w)
             results['mask_fields'].append('gt_masks')
         return results
 

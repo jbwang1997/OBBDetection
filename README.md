@@ -30,6 +30,7 @@ This project is released under the [Apache 2.0 license](LICENSE).
 
 ## Update
 
+- (**2022-03-15**) Support oriented mask. Open source [Oriented R-CNN and Beyond](configs/obb/oriented_rcnn_beyond).
 - (**2021-12-14**) Thanks [liuyanyi](https://github.com/liuyanyi) for reimplementing [S2ANet](configs/obb/s2anet) in OBBDetection.
 - (**2021-11-29**) Discard mmcv-0.6.2 and support mmcv-full.
 - (**2021-09-18**) Implement [Double Head OBB](configs/obb/double_heads_obb) in the OBBDetection.
@@ -51,6 +52,7 @@ Supported backbones:
 Supported oriented detection methods:
 - [x] [S2ANet (TGRS)](configs/obb/s2anet)
 - [x] [Oriented R-CNN (ICCV'2021)](configs/obb/oriented_rcnn)
+- [x] [Oriented R-CNN and Beyond](configs/obb/oriented_rcnn_beyond)
 - [x] [Poly IoU Loss](configs/obb/poly_iou_loss)
 - [x] [Faster R-CNN OBB](configs/obb/faster_rcnn_obb)
 - [x] [Double Head OBB](configs/obb/double_heads_obb)
