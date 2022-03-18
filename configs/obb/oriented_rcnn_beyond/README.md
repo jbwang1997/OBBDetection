@@ -1,6 +1,6 @@
 # Oriented R-CNN and Beyond
 
-> Xingxiing Xie, Gong Cheng, Jiabao Wang, Ke li, Xiwen Yao, Junwei Han,
+> Xingxing Xie, Gong Cheng, Jiabao Wang, Ke li, Xiwen Yao, Junwei Han,
 
 ## Introduction
 
