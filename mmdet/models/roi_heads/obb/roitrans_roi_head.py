@@ -55,6 +55,9 @@ class RoITransRoIHead(OBBBaseRoIHead):
             assert self.bbox_head[-1].start_bbox_type in last_type
             last_type = [self.bbox_head[-1].end_bbox_type]
 
+    def init_mask_head(self, mask_roi_extractor, mask_head):
+        pass
+
     def init_assigner_sampler(self):
         self.bbox_assigner = []
         self.bbox_sampler = []
