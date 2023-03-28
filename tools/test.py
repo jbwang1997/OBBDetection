@@ -12,6 +12,7 @@ from mmdet.apis import multi_gpu_test, single_gpu_test
 from mmdet.core import wrap_fp16_model
 from mmdet.datasets import build_dataloader, build_dataset
 from mmdet.models import build_detector
+from mmdet.datasets.pipelines.obb.dota import replace_ImageToTensor
 
 
 def parse_args():
@@ -93,6 +94,24 @@ def main():
                 cfg.model.neck.rfp_backbone.pretrained = None
     cfg.data.test.test_mode = True
 
+    # in case the test dataset is concatenated
+    samples_per_gpu = 1
+    if isinstance(cfg.data.test, dict):
+        cfg.data.test.test_mode = True
+        samples_per_gpu = cfg.data.pop('samples_per_gpu', 1)
+        if samples_per_gpu > 1:
+            # Replace 'ImageToTensor' to 'DefaultFormatBundle'
+            cfg.data.test.pipeline = replace_ImageToTensor(
+                cfg.data.test.pipeline)
+    elif isinstance(cfg.data.test, list):
+        for ds_cfg in cfg.data.test:
+            ds_cfg.test_mode = True
+        samples_per_gpu = max(
+            [ds_cfg.pop('samples_per_gpu', 1) for ds_cfg in cfg.data])
+        if samples_per_gpu > 1:
+            for ds_cfg in cfg.data.test:
+                ds_cfg.pipeline = replace_ImageToTensor(ds_cfg.pipeline)
+
     # init distributed env first, since logger depends on the dist info.
     if args.launcher == 'none':
         distributed = False
@@ -101,11 +120,10 @@ def main():
         init_dist(args.launcher, **cfg.dist_params)
 
     # build the dataloader
-    # TODO: support multiple images per gpu (only minor changes are needed)
     dataset = build_dataset(cfg.data.test)
     data_loader = build_dataloader(
         dataset,
-        samples_per_gpu=1,
+        samples_per_gpu=samples_per_gpu,
         workers_per_gpu=cfg.data.workers_per_gpu,
         dist=distributed,
         shuffle=False)

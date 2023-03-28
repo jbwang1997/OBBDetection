@@ -1,3 +1,5 @@
+import copy
+import warnings
 import numpy as np
 import BboxToolkit as bt
 import cv2
@@ -134,3 +136,31 @@ class DOTASpecialIgnore(object):
             results[k] = results[k][~ignore]
 
         return results
+
+def replace_ImageToTensor(pipelines):
+    """Replace the ImageToTensor transform in a data pipeline to
+    OBBDefaultFormatBundle, which is normally useful in batch inference.
+
+    Args:
+        pipelines (list[dict]): Data pipeline configs.
+
+    Returns:
+        list: The new pipeline list with all ImageToTensor replaced by
+            OBBDefaultFormatBundle.
+
+
+    """
+    pipelines = copy.deepcopy(pipelines)
+    for i, pipeline in enumerate(pipelines):
+        if pipeline['type'] == 'MultiScaleFlipRotateAug':
+            assert 'transforms' in pipeline
+            pipeline['transforms'] = replace_ImageToTensor(
+                pipeline['transforms'])
+        elif pipeline['type'] == 'ImageToTensor':
+            warnings.warn(
+                '"ImageToTensor" pipeline is replaced by '
+                '"DefaultFormatBundle" for batch inference. It is '
+                'recommended to manually replace it in the test '
+                'data pipeline in your config file.', UserWarning)
+            pipelines[i] = {'type': 'OBBDefaultFormatBundle'}
+    return pipelines

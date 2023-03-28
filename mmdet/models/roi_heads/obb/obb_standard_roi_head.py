@@ -272,15 +272,19 @@ class OBBStandardRoIHead(OBBBaseRoIHead, OBBoxTestMixin, OBBMaskTestMixin):
 
         det_bboxes, det_labels = self.simple_test_bboxes(
             x, img_metas, proposal_list, self.test_cfg, rescale=rescale)
-        bbox_results = arb2result(det_bboxes, det_labels, self.bbox_head.num_classes,
-                                  bbox_type=self.bbox_head.end_bbox_type)
+
+        bbox_results = [
+            arb2result(det_bboxes[i], det_labels[i], self.bbox_head.num_classes,
+                       bbox_type=self.bbox_head.end_bbox_type)
+            for i in range(len(det_bboxes))
+        ]
 
         if not self.with_mask:
             return bbox_results
         else:
             segm_results = self.simple_test_mask(
                 x, img_metas, det_bboxes, det_labels, rescale=rescale)
-            return bbox_results, segm_results
+            return list(zip(bbox_results, segm_results))
 
     def aug_test(self, x, proposal_list, img_metas, rescale=False):
         """Test with augmentations.

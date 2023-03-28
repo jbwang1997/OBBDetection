@@ -139,9 +139,14 @@ class BaseDetector(nn.Module, metaclass=ABCMeta):
         if num_augs != len(img_metas):
             raise ValueError(f'num of augmentations ({len(imgs)}) '
                              f'!= num of image meta ({len(img_metas)})')
-        # TODO: remove the restriction of samples_per_gpu == 1 when prepared
-        samples_per_gpu = imgs[0].size(0)
-        assert samples_per_gpu == 1
+
+        # NOTE the batched image size information may be useful, e.g.
+        # in DETR, this is needed for the construction of masks, which is
+        # then used for the transformer_head.
+        for img, img_meta in zip(imgs, img_metas):
+            batch_size = len(img_meta)
+            for img_id in range(batch_size):
+                img_meta[img_id]['batch_input_shape'] = tuple(img.size()[-2:])
 
         if num_augs == 1:
             """
@@ -154,7 +159,9 @@ class BaseDetector(nn.Module, metaclass=ABCMeta):
                 kwargs['proposals'] = kwargs['proposals'][0]
             return self.simple_test(imgs[0], img_metas[0], **kwargs)
         else:
-            # TODO: support test augmentation for predefined proposals
+            assert imgs[0].size(0) == 1, 'aug test does not support ' \
+                                         'inference with batch size ' \
+                                         f'{imgs[0].size(0)}'
             assert 'proposals' not in kwargs
             return self.aug_test(imgs, img_metas, **kwargs)
 
