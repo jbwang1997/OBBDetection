@@ -23,13 +23,13 @@ def poly2obb(polys):
         obboxes.append([x, y, w, h, theta])
 
     if not obboxes:
-        obboxes = np.zeros((0, 5))
+        obboxes = polys.new_zeros(0, 5)
     else:
-        obboxes = np.array(obboxes)
+        obboxes = polys.new_tensor(obboxes).reshape(-1, 5)
 
     obboxes = regular_obb(obboxes)
     obboxes = obboxes.reshape(*order, 5)
-    return polys.new_tensor(obboxes)
+    return obboxes
 
 
 def rectpoly2obb(polys):
