@@ -22,4 +22,13 @@ First, Users need to pre-process isaid dataset, Please follow the tutorial of [i
 
 ## Citation
 
-To be continue
+```
+@ARTICLE{orcnn_beyond,
+  author={Xie, Xingxing and Cheng, Gong and Wang, Jiabao and Li, Ke and Han, Junwei},
+  journal={International Journal of Computer Vision}, 
+  title={Oriented R-CNN and Beyond}, 
+  year={2024},
+  pages={1-23},
+  doi={https://doi.org/10.1007/s11263-024-01989-w}
+}
+```
