@@ -52,7 +52,7 @@ Supported backbones:
 Supported oriented detection methods:
 - [x] [S2ANet (TGRS)](configs/obb/s2anet)
 - [x] [Oriented R-CNN (ICCV'2021)](configs/obb/oriented_rcnn)
-- [x] [Oriented R-CNN and Beyond](configs/obb/oriented_rcnn_beyond)
+- [x] [Oriented R-CNN and Beyond (IJCV 2024)](configs/obb/oriented_rcnn_beyond)
 - [x] [Poly IoU Loss](configs/obb/poly_iou_loss)
 - [x] [Faster R-CNN OBB](configs/obb/faster_rcnn_obb)
 - [x] [Double Head OBB](configs/obb/double_heads_obb)
